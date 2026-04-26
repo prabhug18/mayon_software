@@ -2,6 +2,8 @@
 
 @section('title','Purchase Order Details')
 
+@php $fmt = fn($v) => number_format((float)$v, 2); @endphp
+
 @section('content')
 <!-- top spacer to add clear space above the PO content -->
 
@@ -105,6 +107,10 @@
                             <h6 class="fw-bold mb-0 text-uppercase tracking-wider">Deliver To / Project</h6>
                         </div>
                         <h5 class="fw-bold mb-2">{{ optional($po->project)->name ?? '-' }}</h5>
+                        @php
+                            $proj = $po->project ?? null;
+                            $projAddr = $proj ? ($proj->address ?? $proj->location ?? '-') : '-';
+                        @endphp
                         <div class="text-muted mb-3">{!! nl2br(e($projAddr)) !!}</div>
                         <div class="small">
                             <div class="mb-1"><span class="text-muted">Site Engineer:</span> {{ optional($po->siteEngineer)->name ?? '-' }}</div>
