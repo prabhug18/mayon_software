@@ -8,47 +8,52 @@
         <div class="card-body p-5">
             <form id="po-form">
                 <input type="hidden" id="po_id" value="{{ $po->id }}" />
+                
                 <!-- Supplier search / add -->
-                <div class="d-flex justify-content-center mb-3 align-items-center">
+                <div class="d-flex justify-content-center mb-5 align-items-center">
                     <div class="position-relative me-2" style="width: 350px;">
-                        <input class="form-control custom-input" id="supplier_text" placeholder="Search supplier..." value="{{ optional($po->supplier)->name }}">
-                        <div id="supplier-suggestions" class="list-group position-absolute w-100 shadow-sm mt-1 d-none" style="z-index:10;"></div>
+                        <input class="form-control custom-input" id="supplier_text" placeholder="Search supplier by name..." value="{{ optional($po->supplier)->name }}">
+                        <div id="supplier-suggestions" class="list-group position-absolute w-100 shadow-sm mt-1 d-none" style="z-index:100;"></div>
                     </div>
-                    <button type="button" class="add-btn-custom btn-sm" id="add-supplier-btn"> <i class="bi bi-plus-lg"></i> </button>
+                    <button type="button" class="btn btn-custom px-3 py-2" id="add-supplier-btn" title="Add New Supplier">
+                        <i class="bi bi-person-plus-fill"></i>
+                    </button>
                 </div>
 
-                <!-- Customer details preview (cards) -->
+                <!-- Supplier details preview -->
                 <div class="section-style mb-4">
-                    <div class="section-title mb-3 fw-bold">Customer Details</div>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="card shadow-sm rounded-4 p-3 text-center h-100">
-                                <div class="fw-bold text-secondary mb-1">Company Name</div>
-                                <div class="fs-5 fw-semibold" id="supplier_company">{{ optional($po->supplier)->name }}</div>
+                    <div class="section-title">
+                        <i class="bi bi-truck me-2"></i> Supplier Details
+                    </div>
+                    <div class="row g-4 mt-2">
+                        <div class="col-md-3">
+                            <div class="p-3 rounded-4 bg-light bg-opacity-50 text-center h-100 border">
+                                <small class="text-muted d-block mb-1">Company Name</small>
+                                <div class="fw-bold" id="supplier_company">{{ optional($po->supplier)->name }}</div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card shadow-sm rounded-4 p-3 text-center h-100">
-                                <div class="fw-bold text-secondary mb-1">Contact Person</div>
-                                <div class="fs-5 fw-semibold" id="supplier_contact">{{ optional($po->supplier)->contact_person }}</div>
+                        <div class="col-md-3">
+                            <div class="p-3 rounded-4 bg-light bg-opacity-50 text-center h-100 border">
+                                <small class="text-muted d-block mb-1">Contact Person</small>
+                                <div class="fw-bold" id="supplier_contact">{{ optional($po->supplier)->contact_person }}</div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card shadow-sm rounded-4 p-3 text-center h-100">
-                                <div class="fw-bold text-secondary mb-1">Phone</div>
-                                <div class="fs-5 fw-semibold" id="supplier_phone">{{ optional($po->supplier)->mobile }}</div>
+                        <div class="col-md-3">
+                            <div class="p-3 rounded-4 bg-light bg-opacity-50 text-center h-100 border">
+                                <small class="text-muted d-block mb-1">Phone</small>
+                                <div class="fw-bold" id="supplier_phone">{{ optional($po->supplier)->mobile }}</div>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <div class="card shadow-sm rounded-4 p-3 text-center h-100">
-                                <div class="fw-bold text-secondary mb-1">GSTIN</div>
-                                <div class="fs-5 fw-semibold" id="supplier_gst">{{ optional($po->supplier)->gst_no }}</div>
+                        <div class="col-md-3">
+                            <div class="p-3 rounded-4 bg-light bg-opacity-50 text-center h-100 border">
+                                <small class="text-muted d-block mb-1">GSTIN</small>
+                                <div class="fw-bold" id="supplier_gst">{{ optional($po->supplier)->gst_no }}</div>
                             </div>
                         </div>
-                        <div class="col-md-8">
-                            <div class="card shadow-sm rounded-4 p-3 h-100">
-                                <div class="fw-bold text-secondary mb-1">Address</div>
-                                <div class="fs-5 fw-semibold" id="supplier_address">{{ optional($po->supplier)->address_line1 }}</div>
+                        <div class="col-md-12">
+                            <div class="p-3 rounded-4 bg-light bg-opacity-50 h-100 border">
+                                <small class="text-muted d-block mb-1">Address</small>
+                                <div class="fw-bold" id="supplier_address">{{ optional($po->supplier)->address_line1 }}</div>
                             </div>
                         </div>
                     </div>
@@ -56,23 +61,25 @@
 
                 <!-- Other details -->
                 <div class="section-style mb-4">
-                    <div class="section-title">Other Details</div>
-                    <div class="row mb-3">
+                    <div class="section-title">
+                        <i class="bi bi-info-circle me-2"></i> PO Information
+                    </div>
+                    <div class="row mt-4">
                         <div class="col-md-4 mb-3">
                             <label class="form-label">PO Number</label>
-                            <input type="text" id="po_number" name="po_number" class="form-control custom-input" style="max-width:300px;" value="{{ $po->po_number }}" />
+                            <input type="text" id="po_number" name="po_number" class="form-control custom-input" value="{{ $po->po_number }}" />
                             <div class="invalid-feedback" id="po_number-error"></div>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Date</label>
-                            <input type="date" id="date" name="date" class="form-control custom-input" style="max-width:300px;" value="{{ $po->date ? $po->date->format('Y-m-d') : '' }}" />
+                            <label class="form-label">Date <span class="text-danger">*</span></label>
+                            <input type="date" id="date" name="date" class="form-control custom-input" value="{{ $po->date ? $po->date->format('Y-m-d') : '' }}" />
                             <div class="invalid-feedback" id="date-error"></div>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Company Name</label>
-                            <select name="company_id" class="form-select custom-input me-2" style="max-width:300px;">
+                            <label class="form-label">Issuing Company <span class="text-danger">*</span></label>
+                            <select name="company_id" class="form-select custom-input me-2">
                                 <option value="">Choose Company</option>
                                 @foreach($companies as $comp)
                                     <option value="{{ $comp->id }}" @if($po->company_id == $comp->id) selected @endif>{{ $comp->name }}</option>
@@ -80,8 +87,8 @@
                             </select>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Projects</label>
-                            <select name="project_id" id="project_id" class="form-select custom-input me-2" style="max-width:300px;">
+                            <label class="form-label">Project Name <span class="text-danger">*</span></label>
+                            <select name="project_id" id="project_id" class="form-select custom-input me-2">
                                 <option value="">Choose Project</option>
                                 @foreach($projects as $project)
                                     <option value="{{ $project->id }}" @if($po->project_id==$project->id) selected @endif>{{ $project->name }}</option>
@@ -89,8 +96,8 @@
                             </select>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Site Engineers</label>
-                            <select name="site_engineer_id" id="site_engineer_id" class="form-select custom-input me-2" style="max-width:300px;">
+                            <label class="form-label">Site Engineer <span class="text-danger">*</span></label>
+                            <select name="site_engineer_id" id="site_engineer_id" class="form-select custom-input me-2">
                                 <option value="">Choose Site Engineer</option>
                                 @foreach(\App\Models\User::whereHas('roles', function($q){ $q->where('name','Site Engineer'); })->get() as $se)
                                     <option value="{{ $se->id }}" @if($po->site_engineer_id == $se->id) selected @endif>{{ $se->name }}</option>
@@ -102,27 +109,43 @@
 
                 <!-- Product / Items -->
                 <div class="section-style mb-4">
-                    <div id="productContainer" class="mb-4">
-                        <div class="section-title">Add Product</div>
-                        <div class="d-flex justify-content-center mb-3 align-items-center">
-                            <div style="position:relative; max-width:300px; width:100%;">
-                                <input id="product_text" class="form-control custom-input" placeholder="Search product by name, category or uom..." autocomplete="off" />
-                                <div id="product-suggestions" class="list-group position-absolute w-100 shadow-sm mt-1 d-none" style="z-index:10;"></div>
-                                <input type="hidden" id="product_id" />
+                    <div class="section-title">
+                        <i class="bi bi-box-seam me-2"></i> Item Selection
+                    </div>
+                    <div id="productContainer" class="mt-4 mb-2">
+                        <div class="row justify-content-center g-2 align-items-center">
+                            <div class="col-md-6">
+                                <div class="position-relative">
+                                    <input id="product_text" class="form-control custom-input" placeholder="Search product by name, category or uom..." autocomplete="off" />
+                                    <div id="product-suggestions" class="list-group position-absolute w-100 shadow mt-1 d-none" style="z-index:100;"></div>
+                                    <input type="hidden" id="product_id" />
+                                </div>
                             </div>
-                            <button type="button" class="add-btn-custom btn-sm" onclick="submitProduct()">Add Product</button>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-primary px-4" onclick="submitProduct()">
+                                    <i class="bi bi-plus-circle me-1"></i> Add Item
+                                </button>
+                            </div>
                         </div>
+                    </div>
+
+                    <div id="quotationContainer" class="table-responsive mt-4"></div>
+                </div>
+
+                <div class="col-md-12 mb-3 mt-5">
+                    <hr class="text-muted opacity-25 mb-4">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-custom px-5" id="submitBtn">
+                            <i class="bi bi-check2-circle me-1"></i> Update Purchase Order
+                        </button>
+                        <a href="{{ route('purchaseOrders.index') }}" class="btn btn-outline-secondary px-4">Cancel</a>
                     </div>
                 </div>
 
-                <div class="section-style mb-4">
-                    <div id="quotationContainer"></div>
-                </div>
-
-                <div class="text-center">
-                    <a href="{{ route('purchaseOrders.index') }}" class="btn btn-outline-secondary me-2">Back</a>
-                    <button type="submit" class="add-btn-custom btn-sm">Submit</button>
-                </div>
+                <input type="hidden" id="supplier_id" name="supplier_id" value="{{ $po->supplier_id }}" />
+            </form>
+        </div>
+    </div>
 
                 <input type="hidden" id="supplier_id" name="supplier_id" value="{{ $po->supplier_id }}" />
             </form>

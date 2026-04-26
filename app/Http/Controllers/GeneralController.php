@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Project;
 use App\Models\PurchaseOrder;
 use App\Models\Enquiry;
+use App\Models\Quotation;
 use Carbon\Carbon;
 
 class GeneralController extends Controller
@@ -78,6 +79,9 @@ class GeneralController extends Controller
         // Total enquiries
         $enquiryCount = \App\Models\Enquiry::count();
 
+        // Total quotations
+        $quotationCount = Quotation::count();
+
         return view('backend.general.dashboard', compact(
             'heading',
             'suppliersCount',
@@ -85,7 +89,7 @@ class GeneralController extends Controller
             'projectsCount',
             'poCurrentMonthCount',
             'recentPOs'
-            ,'followUps', 'todayFollowUpCount', 'tomorrowFollowUpCount', 'pendingFollowUpCount', 'enquiryCount'
+            ,'followUps', 'todayFollowUpCount', 'tomorrowFollowUpCount', 'pendingFollowUpCount', 'enquiryCount', 'quotationCount'
         ));
     }
 

@@ -5,211 +5,191 @@
 @section('content')
 <!-- top spacer to add clear space above the PO content -->
 
-<div class="card shadow-lg border-0" style="max-width:1000px;margin:80px 100px 120px 100px;padding-left:40px;padding-right:40px;padding-bottom:40px;">
-    <div class="card-body p-4">
+    <div class="card theme-card border-0 shadow-lg" style="margin: 40px auto; max-width: 1000px;">
+        <div class="card-body p-0">
+            <!-- Header Section -->
+            <div class="p-5 border-bottom bg-light bg-opacity-50">
+                <div class="d-flex justify-content-between align-items-start no-print mb-4">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="section-icon-box">
+                            <i class="bi bi-cart-check"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-1 fw-bold">Purchase Order</h4>
+                            <div class="text-muted small">View and manage PO details</div>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{{ route('purchaseOrders.index') }}" class="btn btn-white shadow-sm border px-3">
+                            <i class="bi bi-arrow-left me-1"></i> Back
+                        </a>
+                        <a href="{{ route('purchaseOrders.edit', $po->id) }}" class="btn btn-custom px-3">
+                            <i class="bi bi-pencil-square me-1"></i> Edit
+                        </a>
+                        <a href="{{ route('purchaseOrders.print', $po->id) }}?autoprint=1" target="_blank" class="btn btn-dark px-3">
+                            <i class="bi bi-printer me-1"></i> Print
+                        </a>
+                        <button id="send-invoice-btn" type="button" class="btn btn-success px-3">
+                            <i class="bi bi-send me-1"></i> Send Invoice
+                        </button>
+                    </div>
+                </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3 no-print">
-            <div>
-                <h4 class="mb-0">Purchase Order</h4>
-                <div class="text-muted small">{{ $po->po_number }}</div>
-            </div>
-            <div>
-                <a href="{{ route('purchaseOrders.index') }}" class="btn btn-outline-secondary">Back</a>
-                <a href="{{ route('purchaseOrders.edit', $po->id) }}" class="btn btn-primary">Edit</a>
-                <!-- <a href="{{ route('purchaseOrders.pdf', $po->id) }}" class="btn btn-dark">Download PDF</a> -->
-                <a href="{{ route('purchaseOrders.print', $po->id) }}?autoprint=1" target="_blank" class="btn btn-light">Print</a>
-                <button id="send-invoice-btn" type="button" class="btn btn-success">Send Invoice</button>
-            </div>
-        </div>
-
-        <!-- Theme preview controls removed -->
-
-        @php
-            $fmt = fn($v) => number_format((float)$v, 2);
-            // prepare project address for consistent rendering (avoid inline raw-block issues)
-            $proj = $po->project ?? null;
-            $projAddr = $proj ? ($proj->address ?? $proj->location ?? '-') : '-';
-        @endphp
-
-        <style>
-            /* Use explicit colors to ensure print/PDF fidelity */
-            :root{
-                --po-accent: #D6336C; /* rose pink */
-                --po-accent-2: #FFE8F0; /* very light pink */
-                --po-soft: #FFF8FB; /* soft pink-tinted white */
-                --po-text: #2B1F2E; /* dark muted plum for text */
-            }
-
-            .po-top { background: #FFF9FB; padding:12px; border-radius:8px; }
-            .po-badge { background: #D6336C; color: #fff; padding:6px 10px; border-radius:8px; font-weight:700; font-size:0.95rem }
-            .supplier-card { background: #ffffff; border-radius:8px; padding:10px; border:1px solid rgba(17,24,39,0.06); }
-            /* Table header: clear monochrome contrast */
-            .table-items thead th { background: var(--po-accent-2); color: var(--po-accent); font-weight:700; border-bottom: 1px solid rgba(17,24,39,0.06); }
-            .table-items thead th:first-child { border-top-left-radius:6px; }
-            .table-items thead th:last-child { border-top-right-radius:6px; }
-            .table-items tbody tr:nth-child(odd){ background: #fff; }
-            .table-items tbody tr:nth-child(even){ background: #FAFAFA; }
-            .amount-cell{ color: var(--po-accent); font-weight:700; }
-            .totals-panel{ background: linear-gradient(180deg,var(--po-accent), #0B1220); color:white; padding:12px; border-radius:8px; }
-
-                /* Alternate palettes removed; default palette applied */
-            @page { size: A4 portrait; margin: 18mm; }
-            @media print{
-                /* Ensure colors are preserved and adjusted for print/PDF */
-                html, body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                /* Force solid backgrounds for critical elements */
-                .po-top { background: #FFF9FB !important; }
-                .po-badge { background: #D6336C !important; color:#fff !important }
-                .supplier-card { background: #FFFFFF !important }
-                .totals-panel { background: #D6336C !important; color:#fff !important }
-
-                /* Show top spacer in printed output to maintain outer space */
-                .po-top-spacer { display:block !important; height:24px !important; }
-
-                /* Solid fallbacks for PDF engines that strip gradients; use explicit hex values */
-                .po-top { background: #FFE8F0 !important; color: #000 !important; }
-                .supplier-card { background: #FFFFFF !important; color: #000 !important; border: 1px solid #e6e6e6 !important; }
-                .totals-panel { background: #D6336C !important; color: #fff !important; }
-
-                /* Remove heavy shadows and rounded clipping which some renderers mis-handle */
-                .card { box-shadow: none !important; border-radius: 0 !important; }
-
-                /* Table page break rules: avoid breaking inside rows */
-                table { width:100%; border-collapse: collapse; }
-                tr, td, th { page-break-inside: avoid; }
-
-                /* Hide interactive UI in print */
-                .no-print{display:none!important;}
-            }
-        </style>
-
-    <div class="po-top d-flex justify-content-between align-items-center mb-3" style="background-color:#FFF9FB;-webkit-print-color-adjust:exact;">
-            <div class="d-flex align-items-center gap-3">
-                @if(optional($po->company)->logo)
-                    <img src="{{ asset(optional($po->company)->logo) }}" alt="{{ $po->company->name }}" style="height:48px; width:auto; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.06)">
-                @else
-                    <div style="height:64px;width:64px;border-radius:8px;background:var(--po-accent-2);display:flex;align-items:center;justify-content:center;color:var(--po-accent);font-weight:700">{{ strtoupper(substr(optional($po->company)->name ?? 'CO',0,2)) }}</div>
-                @endif
-                <div>
-                    <div class="fw-bold" style="color:var(--po-text)">{{ optional($po->company)->name }}</div>
-                        @php
-                            $company = $po->company ?? null;
-                            $addr = '';
-                            if ($company) {
-                                if (!empty($company->address_line1) || !empty($company->address_line2) || !empty($company->city) || !empty($company->pincode)) {
-                                    $parts = array_filter([ $company->address_line1 ?? null, $company->address_line2 ?? null, ($company->city ?? null) ? ($company->city . ($company->pincode ? ' - '.$company->pincode : '')) : null ]);
-                                    $addr = implode("\n", $parts);
-                                } else {
-                                    $addr = $company->address ?? '';
-                                }
-                            }
-                        @endphp
-                        <div class="small text-muted">{!! nl2br(e($addr)) !!}</div>
-                        <div class="small text-muted mt-1">Mobile: {{ optional($po->company)->mobile ?? '-' }} @if(optional($po->company)->gst_no) | GST: {{ optional($po->company)->gst_no }} @endif</div>
-                        <div class="small text-muted">Email: {{ optional($po->company)->email ?? '-' }}</div>
+                <div class="row g-4 mt-2">
+                    <div class="col-md-7">
+                        <div class="d-flex align-items-center gap-3">
+                            @if(optional($po->company)->logo)
+                                <img src="{{ asset(optional($po->company)->logo) }}" alt="{{ $po->company->name }}" style="height:64px; width:auto; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08)">
+                            @else
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-4 d-flex align-items-center justify-content-center fw-bold fs-4" style="height:64px;width:64px;">
+                                    {{ strtoupper(substr(optional($po->company)->name ?? 'CO',0,2)) }}
+                                </div>
+                            @endif
+                            <div>
+                                <h5 class="fw-bold mb-1">{{ optional($po->company)->name }}</h5>
+                                @php
+                                    $company = $po->company ?? null;
+                                    $addr = '';
+                                    if ($company) {
+                                        if (!empty($company->address_line1) || !empty($company->address_line2) || !empty($company->city) || !empty($company->pincode)) {
+                                            $parts = array_filter([ $company->address_line1 ?? null, $company->address_line2 ?? null, ($company->city ?? null) ? ($company->city . ($company->pincode ? ' - '.$company->pincode : '')) : null ]);
+                                            $addr = implode("\n", $parts);
+                                        } else {
+                                            $addr = $company->address ?? '';
+                                        }
+                                    }
+                                @endphp
+                                <div class="small text-muted mb-0">{!! nl2br(e($addr)) !!}</div>
+                                <div class="small text-muted mt-1">
+                                    <i class="bi bi-telephone-fill me-1"></i> {{ optional($po->company)->mobile ?? '-' }}
+                                    @if(optional($po->company)->gst_no)
+                                        <span class="mx-2 text-dark opacity-25">|</span>
+                                        <i class="bi bi-receipt me-1"></i> GST: {{ optional($po->company)->gst_no }}
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5 text-md-end">
+                        <div class="bg-white p-4 rounded-4 shadow-sm border border-light h-100">
+                            <div class="text-uppercase tracking-wider small text-muted mb-1 fw-bold">PO Number</div>
+                            <div class="h4 fw-bold text-primary mb-3">{{ $po->po_number }}</div>
+                            <div class="d-flex justify-content-md-end gap-3 small">
+                                <span class="text-muted"><i class="bi bi-calendar3 me-1"></i> Date:</span>
+                                <span class="fw-bold">{{ optional($po->po_date)->format('d M Y') ?? '-' }}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="text-end">
-                <div class="po-badge" style="background-color:#D6336C;color:#fff;-webkit-print-color-adjust:exact">{{ $po->po_number }}</div>
-                <div class="small text-muted mt-2">PO Date: <strong>{{ optional($po->po_date)->format('d M Y') ?? '-' }}</strong></div>
+            <div class="p-5">
+                <!-- Supplier & Deliver To Section -->
+                <div class="row g-4 mb-5">
+                    <div class="col-md-6 border-end pe-md-5">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <i class="bi bi-truck text-custom fs-5"></i>
+                            <h6 class="fw-bold mb-0 text-uppercase tracking-wider">Bill To / Supplier</h6>
+                        </div>
+                        <h5 class="fw-bold mb-2">{{ optional($po->supplier)->name ?? '-' }}</h5>
+                        <div class="text-muted mb-3">{!! nl2br(e(optional($po->supplier)->address ?? '')) !!}</div>
+                        <div class="small">
+                            <div class="mb-1"><span class="text-muted">Contact:</span> {{ optional($po->supplier)->contact_person ?? '-' }}</div>
+                            <div class="mb-1"><span class="text-muted">Phone:</span> {{ optional($po->supplier)->mobile ?? '-' }}</div>
+                            <div><span class="text-muted">Email:</span> {{ optional($po->supplier)->email ?? '-' }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 ps-md-5">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <i class="bi bi-geo-alt text-custom fs-5"></i>
+                            <h6 class="fw-bold mb-0 text-uppercase tracking-wider">Deliver To / Project</h6>
+                        </div>
+                        <h5 class="fw-bold mb-2">{{ optional($po->project)->name ?? '-' }}</h5>
+                        <div class="text-muted mb-3">{!! nl2br(e($projAddr)) !!}</div>
+                        <div class="small">
+                            <div class="mb-1"><span class="text-muted">Site Engineer:</span> {{ optional($po->siteEngineer)->name ?? '-' }}</div>
+                            <div>{{ optional($po->siteEngineer)->mobile ? 'Phone: ' . optional($po->siteEngineer)->mobile : '' }}</div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="row g-3 mb-3">
-            <div class="col-md-6">
-                <div class="supplier-card">
-                    <div class="small text-muted">Bill To</div>
-                    <div class="fw-semibold">{{ optional($po->supplier)->name ?? '-' }}</div>
-                    <div class="small text-muted mt-1">{!! nl2br(e(optional($po->supplier)->address ?? '')) !!}</div>
-                    <div class="small text-muted mt-1">Mobile: {{ optional($po->supplier)->mobile ?? '-' }}</div>
-                    <div class="small text-muted">Email: {{ optional($po->supplier)->email ?? '-' }}</div>
+                <!-- Items Table -->
+                <div class="table-responsive mb-4">
+                    <table class="table custom-table align-middle">
+                        <thead>
+                            <tr class="text-uppercase xsmall tracking-wider">
+                                <th style="width: 50px;">#</th>
+                                <th>Item Description</th>
+                                <th class="text-center" style="width: 100px;">UOM</th>
+                                <th class="text-center" style="width: 100px;">Qty</th>
+                                <th class="text-end" style="width: 150px;">Unit Price</th>
+                                <th class="text-end" style="width: 150px;">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($po->items as $i => $item)
+                            <tr>
+                                <td class="text-muted">{{ $i + 1 }}</td>
+                                <td>
+                                    <div class="fw-semibold text-dark">{!! nl2br(e($item->description ?? '-')) !!}</div>
+                                </td>
+                                <td class="text-center"><span class="badge bg-light text-dark fw-normal rounded-pill px-3">{{ optional($item->uom)->name ?? '-' }}</span></td>
+                                <td class="text-center fw-bold">{{ $fmt($item->quantity) }}</td>
+                                <td class="text-end text-muted">{{ $fmt($item->unit_price) }}</td>
+                                <td class="text-end fw-bold text-dark">{{ $fmt($item->total) }}</td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="6" class="p-5 text-center text-muted">
+                                    <i class="bi bi-inbox fs-1 d-block mb-3 opacity-25"></i>
+                                    No items found for this PO.
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="5" class="text-end border-0 pt-4">
+                                    <h6 class="fw-bold mb-0">Grand Total</h6>
+                                </td>
+                                <td class="text-end border-0 pt-4">
+                                    <h5 class="fw-bold text-primary mb-0">{{ config('app.currency_symbol', '₹') }} {{ $fmt($po->amount) }}</h5>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
-            </div>
-            <div class="col-md-6">
-                <div class="supplier-card text-md-end">
-                    <div class="small text-muted">Deliver To</div>
-                    <div class="fw-semibold">{{ optional($po->project)->name ?? '-' }}</div>
-                    <div class="small text-muted mt-1">{!! nl2br(e($projAddr)) !!}</div>
-                </div>
-            </div>
-        </div>
 
-        <div class="table-responsive mb-3">
-            <table class="table table-sm table-items align-middle">
-                <thead>
-                    <tr class="text-muted small">
-                        <th style="width:40px;background-color:#FFE8F0;color:#D6336C">#</th>
-                        <th style="background-color:#FFE8F0;color:#D6336C">Description</th>
-                        <th style="width:80px;background-color:#FFE8F0;color:#D6336C">UOM</th>
-                        <th class="text-end" style="width:90px;background-color:#FFE8F0;color:#D6336C">Qty</th>
-                        <th class="text-end" style="width:130px;background-color:#FFE8F0;color:#D6336C">Unit Price</th>
-                        <th class="text-end" style="width:140px;background-color:#FFE8F0;color:#D6336C">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($po->items as $i => $item)
-                    <tr>
-                        <td>{{ $i + 1 }}</td>
-                        <td>{!! nl2br(e($item->description ?? '-')) !!}</td>
-                        <td>{{ optional($item->uom)->name ?? '-' }}</td>
-                        <td class="text-end">{{ $fmt($item->quantity) }}</td>
-                        <td class="text-end">{{ $fmt($item->unit_price) }}</td>
-                        <td class="text-end amount-cell">{{ $fmt($item->total) }}</td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="5" class="text-center text-muted">No items found for this PO.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <div class="row g-3 align-items-start">
-            <div class="col-md-7">
-                {{-- Site Engineer & Notes (left column under products) --}}
-                <div class="mb-3">
-                    <div class="small text-muted">Site Engineer</div>
-                    <div class="fw-semibold">{{ optional($po->siteEngineer)->name ?? '-' }} @if(optional($po->siteEngineer)->mobile) | {{ optional($po->siteEngineer)->mobile }} @endif</div>
-                </div>
                 @if($po->notes)
-                <div class="small text-muted">Notes / Terms</div>
-                <div class="mt-2">{!! nl2br(e($po->notes)) !!}</div>
+                <div class="mt-5 p-4 rounded-4 bg-light bg-opacity-50 border">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-journals text-muted"></i>
+                        <h6 class="fw-bold mb-0">Notes / Terms & Conditions</h6>
+                    </div>
+                    <div class="text-muted small lh-base">{!! nl2br(e($po->notes)) !!}</div>
+                </div>
                 @endif
-            </div>
 
-            <div class="col-md-5">
-                <div class="totals-panel" style="background-color:#D6336C;color:#fff;-webkit-print-color-adjust:exact;border-radius:8px;padding:12px;">
-                    <div class="d-flex justify-content-between fw-bold">
-                        <div>Grand Total</div>
-                        <div>{{ config('app.currency_symbol', '₹') }} {{ $fmt($po->amount) }}</div>
+                <div class="row mt-5 pt-4">
+                    <div class="col-md-6 border-end">
+                        <div class="small text-muted text-uppercase tracking-wider mb-4 fw-bold">Prepared By</div>
+                        <div class="fw-bold h5 text-dark mb-1">{{ optional($po->createdBy)->name ?? auth()->user()->name ?? '-' }}</div>
+                        <div class="small text-muted">Mayon Flooring Pvt Ltd</div>
+                    </div>
+                    <div class="col-md-6 text-md-end ps-md-5">
+                        <div class="small text-muted text-uppercase tracking-wider mb-4 fw-bold">Authorized Signature</div>
+                        <div class="mt-2">
+                            @if(optional($po->company)->authorized_image)
+                                <img src="{{ asset(optional($po->company)->authorized_image) }}" alt="Authorized" style="max-height:80px; filter: grayscale(100%) brightness(0.9);" />
+                            @else
+                                <div class="border-bottom d-inline-block" style="width: 200px; height: 60px;"></div>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-
-
-        <div class="row mt-5 align-items-center">
-            <div class="col-md-6">
-                <div class="small text-muted">Prepared By</div>
-                <div class="mt-3">{{ optional($po->createdBy)->name ?? auth()->user()->name ?? '________________' }}</div>
-            </div>
-            <div class="col-md-6 text-md-end">
-                <div class="small text-muted">Authorized Signature</div>
-                <div class="mt-3">
-                    @if(optional($po->company)->authorized_image)
-                        <img src="{{ asset(optional($po->company)->authorized_image) }}" alt="Authorized" style="max-height:80px;" />
-                    @else
-                        ______________________________
-                    @endif
-                </div>
-            </div>
-        </div>
-
     </div>
-</div>
 <!-- Theme toggler removed -->
 <script>
     (function(){

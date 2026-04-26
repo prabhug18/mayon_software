@@ -5,7 +5,9 @@
     <div class="card-body p-5">
         <form id="company-edit-form" enctype="multipart/form-data">
             <div class="section-style mb-4">
-                <div class="section-title">Company Details</div>
+                <div class="section-title">
+                    <i class="bi bi-building me-2"></i> Company Details
+                </div>
                 <div class="row mt-5">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Company Name <span class="text-danger">*</span></label>
@@ -66,9 +68,14 @@
                             @endif
                         </div>
                     </div>
-                    <div class="col-md-6 mb-3 d-flex align-items-center gap-2 mt-3">
-                        <a href="{{ route('companies.index') }}" class="btn btn-outline-secondary">Back</a>
-                        <button type="submit" class="btn btn-custom px-5 py-2" id="submitBtn">Update</button>
+                    <div class="col-md-12 mb-3 mt-4">
+                        <hr class="text-muted opacity-25 mb-4">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-custom px-5" id="submitBtn">
+                                <i class="bi bi-check2-circle me-1"></i> Update Company
+                            </button>
+                            <a href="{{ route('companies.index') }}" class="btn btn-outline-secondary px-4">Cancel</a>
+                        </div>
                     </div>
                 </div>
             </div>

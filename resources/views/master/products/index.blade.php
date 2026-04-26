@@ -1,26 +1,31 @@
 @extends('layouts.backend')
 @section('title','Products')
 @section('content')
-<div class="card shadow-sm">
+<div class="card theme-card shadow-sm border-0">
     <div class="card-body p-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">Products</h5>
-            <div>
-                <a href="{{ route('products.create') }}" class="btn btn-custom">+ Add Product</a>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="section-title mb-0">
+                <i class="bi bi-box-seam me-2"></i> Products
             </div>
+            <a href="{{ route('products.create') }}" class="btn btn-custom px-4">
+                <i class="bi bi-plus-lg me-1"></i> Add Product
+            </a>
         </div>
-        <table id="ProductTable" class="table table-bordered table-hover custom-table mb-0">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Category</th>
-                    <th>UOM</th>
-                    <th>Image</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-        </table>
+        
+        <div class="table-responsive">
+            <table id="ProductTable" class="table custom-table table-hover w-100">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>UOM</th>
+                        <th>Image</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
     </div>
 </div>
 

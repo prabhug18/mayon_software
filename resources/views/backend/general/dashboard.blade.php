@@ -31,7 +31,15 @@
             <p>{{ $tomorrowFollowUpCount ?? 0 }}</p>
           </div>
         </div>
-
+        <div class="col-md-3 col-sm-6">
+          <div class="glass-card position-relative" data-accent="indigo">
+            <div class="icon-wrapper bg-indigo">
+              <i class="bi bi-file-earmark-text"></i>
+            </div>
+            <h6 class="mt-5">Total Quotations</h6>
+            <p>{{ $quotationCount ?? 0 }}</p>
+          </div>
+        </div>
           <!-- Today Follow-ups Modal -->
           <div class="modal fade" id="todayFollowupsModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-scrollable">

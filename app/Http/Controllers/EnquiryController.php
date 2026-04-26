@@ -20,7 +20,7 @@ class EnquiryController extends Controller
     {
         $heading = 'Enquiries';
         if ($request->wantsJson()) {
-            $data = Enquiry::with(['project','enquiryType','source'])->orderBy('id','desc')->get();
+            $data = Enquiry::with(['enquiryType','source', 'service', 'serviceItem', 'assignedTo'])->orderBy('id','desc')->get();
             return $this->success($data);
         }
         return view('master.enquiry.index', compact('heading'));
@@ -32,7 +32,9 @@ class EnquiryController extends Controller
         $projects = Project::orderBy('name')->get();
         $enquiryTypes = EnquiryType::orderBy('name')->get();
         $sources = Source::orderBy('name')->get();
-        return view('master.enquiry.create', compact('heading','projects','enquiryTypes','sources'));
+        $services = \App\Models\Service::orderBy('category')->orderBy('name')->get()->groupBy('category');
+        $users = \App\Models\User::orderBy('name')->get();
+        return view('master.enquiry.create', compact('heading','projects','enquiryTypes','sources', 'services', 'users'));
     }
 
     public function store(Request $request)
@@ -40,19 +42,30 @@ class EnquiryController extends Controller
         $validator = Validator::make($request->all(), [
             'mobile' => 'nullable|string|max:50',
             'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
             'location' => 'nullable|string|max:255',
+            'gstin' => 'nullable|string|max:50',
+            'address' => 'nullable|string',
             'enquiry_type_id' => 'nullable|exists:enquiry_types,id',
             'project_id' => 'nullable|exists:projects,id',
             'description' => 'nullable|string',
             'status' => 'nullable|string|max:100',
+            'priority' => 'nullable|string|max:50',
+            'assigned_to' => 'nullable|exists:users,id',
             'source_id' => 'nullable|exists:sources,id',
+            'service_id' => 'nullable|exists:services,id',
+            'service_item_id' => 'nullable|exists:service_items,id',
             'next_follow_up_at' => 'nullable|date',
             'reminder_notes' => 'nullable|string'
         ]);
 
         if ($validator->fails()) return response()->json(['status'=>'error','errors'=>$validator->errors()],422);
 
-        $data = $request->only(['mobile','name','location','enquiry_type_id','project_id','description','status','source_id','next_follow_up_at','reminder_notes']);
+        $data = $request->only([
+            'mobile','name','email','location','gstin','address',
+            'enquiry_type_id','project_id','description','status','priority','assigned_to',
+            'source_id', 'service_id', 'service_item_id', 'next_follow_up_at','reminder_notes'
+        ]);
         $enquiry = Enquiry::create($data);
 
         // create initial follow-up record if a next_follow_up_at was provided (avoid duplicates)
@@ -79,7 +92,9 @@ class EnquiryController extends Controller
         $projects = Project::orderBy('name')->get();
         $enquiryTypes = EnquiryType::orderBy('name')->get();
         $sources = Source::orderBy('name')->get();
-        return view('master.enquiry.edit', compact('heading','enquiry','projects','enquiryTypes','sources'));
+        $services = \App\Models\Service::orderBy('category')->orderBy('name')->get()->groupBy('category');
+        $users = \App\Models\User::orderBy('name')->get();
+        return view('master.enquiry.edit', compact('heading','enquiry','projects','enquiryTypes','sources', 'services', 'users'));
     }
 
     public function update(Request $request, $id)
@@ -88,18 +103,29 @@ class EnquiryController extends Controller
         $validator = Validator::make($request->all(), [
             'mobile' => 'nullable|string|max:50',
             'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
             'location' => 'nullable|string|max:255',
+            'gstin' => 'nullable|string|max:50',
+            'address' => 'nullable|string',
             'enquiry_type_id' => 'nullable|exists:enquiry_types,id',
             'project_id' => 'nullable|exists:projects,id',
             'description' => 'nullable|string',
             'status' => 'nullable|string|max:100',
+            'priority' => 'nullable|string|max:50',
+            'assigned_to' => 'nullable|exists:users,id',
             'source_id' => 'nullable|exists:sources,id',
+            'service_id' => 'nullable|exists:services,id',
+            'service_item_id' => 'nullable|exists:service_items,id',
             'next_follow_up_at' => 'nullable|date',
             'reminder_notes' => 'nullable|string'
         ]);
         if ($validator->fails()) return response()->json(['status'=>'error','errors'=>$validator->errors()],422);
 
-        $data = $request->only(['mobile','name','location','enquiry_type_id','project_id','description','status','source_id','next_follow_up_at','reminder_notes']);
+        $data = $request->only([
+            'mobile','name','email','location','gstin','address',
+            'enquiry_type_id','project_id','description','status','priority','assigned_to',
+            'source_id', 'service_id', 'service_item_id', 'next_follow_up_at','reminder_notes'
+        ]);
         // detect change in next_follow_up_at to store history
         $oldNext = $enquiry->next_follow_up_at ? $enquiry->next_follow_up_at->toDateTimeString() : null;
         $newNext = isset($data['next_follow_up_at']) ? $data['next_follow_up_at'] : null;
@@ -197,12 +223,20 @@ class EnquiryController extends Controller
 
     public function show(Request $request, $id)
     {
-        $enquiry = Enquiry::with(['project','enquiryType','source','comments.user','followUps'])->findOrFail($id);
+        $enquiry = Enquiry::with(['project','enquiryType','source','service','serviceItem','comments.user','followUps.user', 'assignedTo'])->findOrFail($id);
         if ($request->wantsJson()) {
             return $this->success($enquiry);
         }
         $heading = 'Enquiry Details';
-        return view('master.enquiry.show', compact('heading','enquiry'));
+        
+        // Fetch activity logs for this enquiry
+        $activities = \Spatie\Activitylog\Models\Activity::where('subject_type', Enquiry::class)
+            ->where('subject_id', $id)
+            ->with('causer')
+            ->latest()
+            ->get();
+
+        return view('master.enquiry.show', compact('heading','enquiry', 'activities'));
     }
 
     public function checkName(Request $request)

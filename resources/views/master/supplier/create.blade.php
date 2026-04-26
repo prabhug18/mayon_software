@@ -5,7 +5,9 @@
     <div class="card-body p-5">
         <form id="supplier-form" enctype="multipart/form-data">
             <div class="section-style mb-4">
-                <div class="section-title">Supplier Details</div>
+                <div class="section-title">
+                    <i class="bi bi-truck me-2"></i> Supplier Details
+                </div>
                 <div class="row mt-5">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Supplier Name <span class="text-danger">*</span></label>
@@ -74,9 +76,14 @@
                         <div class="invalid-feedback" id="gst_no-error"></div>
                     </div>
 
-                    <div class="col-md-6 mb-3 d-flex align-items-center gap-2 mt-3">
-                        <a href="{{ route('suppliers.index') }}" class="btn btn-outline-secondary">Back</a>
-                        <button type="submit" class="btn btn-custom px-5 py-2" id="submitBtn">Submit</button>
+                    <div class="col-md-12 mb-3 mt-4">
+                        <hr class="text-muted opacity-25 mb-4">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-custom px-5" id="submitBtn">
+                                <i class="bi bi-check2-circle me-1"></i> Create Supplier
+                            </button>
+                            <a href="{{ route('suppliers.index') }}" class="btn btn-outline-secondary px-4">Cancel</a>
+                        </div>
                     </div>
                 </div>
             </div>

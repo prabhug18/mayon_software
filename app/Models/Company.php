@@ -13,6 +13,7 @@ class Company extends Model
     protected $fillable = [
         'name',
         'po_prefix',
+        'quotation_prefix',
         'contact_person',
         'mobile',
         'email',
@@ -21,6 +22,11 @@ class Company extends Model
         'authorized_image',
         'gst_no'
     ];
+
+    public function quotations()
+    {
+        return $this->hasMany(\App\Models\Quotation::class);
+    }
 
     // helper to get public URL for the authorized image (if using public assets path)
     public function getAuthorizedImageUrlAttribute()

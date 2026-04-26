@@ -57,12 +57,12 @@ class UserController extends Controller
     public function store(UserRequest $request)
     {
         $user = $this->service->create($request->validated());
+        
         // Assign role if provided
         if ($request->filled('role')) {
             $user->assignRole($request->input('role'));
         }
-        // Notifications temporarily disabled
-        // $user->notify(new UserRegisteredNotification());
+
         activity()->causedBy(Auth::user())->performedOn($user)->log('User created');
         return $this->success(new UserResource($user), 'User created successfully');
     }
@@ -73,7 +73,7 @@ class UserController extends Controller
     public function show($id)
     {
         $heading = 'User Details';
-        $user = User::findOrFail($id);
+        $user = User::with(['roles', 'permissions'])->findOrFail($id);
         return view('backend.user.show', compact('user', 'heading'));
     }
 
@@ -83,7 +83,7 @@ class UserController extends Controller
     public function edit($id)
     {
         $heading = 'Edit User';
-        $user = User::findOrFail($id);
+        $user = User::with(['roles', 'permissions'])->findOrFail($id);
         $roles = \Spatie\Permission\Models\Role::all();
         return view('backend.user.edit', compact('user', 'roles', 'heading'));
     }
@@ -94,10 +94,12 @@ class UserController extends Controller
     public function update(UserRequest $request, User $user)
     {
         $user = $this->service->update($user, $request->validated());
+        
         // Sync role if provided
         if ($request->filled('role')) {
             $user->syncRoles([$request->input('role')]);
         }
+
         activity()->causedBy(Auth::user())->performedOn($user)->log('User updated');
         return $this->success(new UserResource($user), 'User updated successfully');
     }

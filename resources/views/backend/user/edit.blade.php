@@ -25,7 +25,10 @@
                             <div class="invalid-feedback" id="mobile-error"></div>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Role <span class="text-danger">*</span></label>
+                            <div class="d-flex justify-content-between">
+                                <label class="form-label">Role <span class="text-danger">*</span></label>
+                                <a href="{{ route('roles.index') }}" class="small text-decoration-none"><i class="bi bi-gear me-1"></i>Manage Roles</a>
+                            </div>
                             <select class="form-select custom-input" id="role" name="role" required>
                                 <option value="" disabled>Select Role</option>
                                 @foreach($roles as $role)
@@ -42,7 +45,7 @@
                     <div class="row">
                         <div class="col-md-4 mb-3">
                             <label class="form-label">Password</label>
-                            <input type="password" class="form-control custom-input" id="password" name="password" />
+                            <input type="password" class="form-control custom-input" id="password" name="password" autocomplete="new-password" />
                             <div class="invalid-feedback" id="password-error"></div>
                         </div>
                     </div>

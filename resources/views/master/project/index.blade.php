@@ -4,24 +4,31 @@
 @section('title', 'Projects')
 
 @section('content')
-<div class="card">
+<div class="card theme-card shadow-sm border-0">
     <div class="card-body p-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="mb-0">Projects</h4>
-            <a href="{{ route('projects.create') }}" class="add-btn-custom">Add Project</a>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="section-title mb-0">
+                <i class="bi bi-geo-alt me-2"></i> Projects
+            </div>
+            <a href="{{ route('projects.create') }}" class="btn btn-custom px-4">
+                <i class="bi bi-plus-lg me-1"></i> Add Project
+            </a>
         </div>
-        <table id="ProjectTable" class="table table-bordered table-hover table-striped custom-table mb-0">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Name</th>
-                    <th>Location</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+        
+        <div class="table-responsive">
+            <table id="ProjectTable" class="table custom-table table-hover w-100">
+                <thead>
+                    <tr>
+                        <th width="50">#</th>
+                        <th>Name</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
 </div>
 
