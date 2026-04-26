@@ -90,20 +90,18 @@
 				<table style="width:100%;border-collapse:collapse;">
 				<tr>
 					<td style="vertical-align:top;width:65%;padding:0">
-						<table style="border-collapse:collapse;width:100%"><tr>
-							<td style="width:72px;vertical-align:top;padding-right:12px">
-								@if($companyLogoSrc)
-									<img src="{{ $companyLogoSrc }}" alt="{{ optional($po->company)->name }}" style="height:64px; width:auto; border-radius:8px;">
-								@else
-									<div style="height:64px;width:64px;border-radius:8px;background:#FFE8F0;display:inline-flex;align-items:center;justify-content:center;color:#D6336C;font-weight:700">{{ strtoupper(substr(optional($po->company)->name ?? 'CO',0,2)) }}</div>
-								@endif
-							</td>
-							<td style="vertical-align:top;padding:0">
-								<div style="font-weight:700">{{ optional($po->company)->name }}</div>
-								<div style="font-size:12px;color:#666">{!! nl2br(e(optional($po->company)->address ?? '')) !!}</div>
-								<div style="font-size:12px;color:#666;margin-top:6px">Mobile: {{ optional($po->company)->mobile ?? '-' }} @if(optional($po->company)->gst_no) | GST: {{ optional($po->company)->gst_no }}@endif</div>
-							</td>
-						</tr></table>
+						<div>
+							@if($companyLogoSrc)
+								<img src="{{ $companyLogoSrc }}" alt="{{ optional($po->company)->name }}" style="max-height:80px; width:auto; border-radius:8px; margin-bottom:8px;">
+							@else
+								<div style="height:64px;width:64px;border-radius:8px;background:#FFE8F0;display:inline-flex;align-items:center;justify-content:center;color:#D6336C;font-weight:700;margin-bottom:8px;">{{ strtoupper(substr(optional($po->company)->name ?? 'CO',0,2)) }}</div>
+							@endif
+						</div>
+						<div>
+							<div style="font-weight:700">{{ optional($po->company)->name }}</div>
+							<div style="font-size:12px;color:#666">{!! nl2br(e(optional($po->company)->address ?? '')) !!}</div>
+							<div style="font-size:12px;color:#666;margin-top:6px">Mobile: {{ optional($po->company)->mobile ?? '-' }} @if(optional($po->company)->gst_no) | GST: {{ optional($po->company)->gst_no }}@endif</div>
+						</div>
 					</td>
 					<td style="vertical-align:top;width:35%;padding:0;text-align:right">
 						<div style="display:inline-block;margin-bottom:6px;">
