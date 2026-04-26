@@ -69,6 +69,7 @@
           </a>
           <ul class="submenu">
               <li><a href="{{ route('enquiry-types.index') }}"><i class="fas fa-tags"></i><span> Enquiry Type</span></a></li>
+              <li><a href="{{ route('projects.index') }}"><i class="fas fa-project-diagram"></i><span> Project</span></a></li>
               <li><a href="{{ route('companies.index') }}"><i class="fas fa-building"></i><span> Company</span></a></li>
               <li><a href="{{ route('services.index') }}"><i class="fas fa-concierge-bell"></i><span> Services</span></a></li>
               <li><a href="{{ route('service-items.index') }}"><i class="fas fa-list-ul"></i><span> Service Items</span></a></li>
