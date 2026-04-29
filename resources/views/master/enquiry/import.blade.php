@@ -173,8 +173,14 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="p-3 border rounded-4 bg-light">
+                                        <div class="h3 fw-bold text-info mb-0" id="stat-updated">0</div>
+                                        <div class="small text-muted text-uppercase fw-bold">Updated (Backfilled)</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="p-3 border rounded-4 bg-light">
                                         <div class="h3 fw-bold text-warning mb-0" id="stat-duplicates">0</div>
-                                        <div class="small text-muted text-uppercase fw-bold">Skipped (Duplicates)</div>
+                                        <div class="small text-muted text-uppercase fw-bold">Skipped (No Changes)</div>
                                     </div>
                                 </div>
                             </div>
@@ -375,6 +381,7 @@ $(function() {
             success: function(res) {
                 Swal.close();
                 $('#stat-imported').text(res.data.imported);
+                $('#stat-updated').text(res.data.updated || 0);
                 $('#stat-duplicates').text(res.data.duplicates);
                 
                 $('#step-2-content').addClass('d-none');
@@ -382,7 +389,11 @@ $(function() {
                 $('#step-2-indicator').addClass('completed');
                 $('#step-3-indicator').addClass('active');
                 
-                $('#import-summary-text').text(`Processed all rows from the CSV file. ${res.data.imported} leads were successfully added to your enquiry database.`);
+                let summaryParts = [];
+                if (res.data.imported > 0) summaryParts.push(`${res.data.imported} new leads imported`);
+                if (res.data.updated > 0) summaryParts.push(`${res.data.updated} existing leads updated with missing data`);
+                if (res.data.duplicates > 0) summaryParts.push(`${res.data.duplicates} already up-to-date`);
+                $('#import-summary-text').text(`Processed all rows. ${summaryParts.join(', ')}.`);
             },
             error: function(xhr) {
                 Swal.fire('Import Failed', xhr.responseJSON.message || 'Server error', 'error');

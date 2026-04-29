@@ -106,6 +106,7 @@ class FacebookLeadImportController extends Controller
         $services = Service::all();
 
         $importedCount = 0;
+        $updatedCount = 0;
         $duplicateCount = 0;
         $errorCount = 0;
 
@@ -116,10 +117,37 @@ class FacebookLeadImportController extends Controller
                 
                 $fbLeadId = $data[$mapping['fb_lead_id']] ?? null;
                 
-                // Deduplication
-                if ($fbLeadId && Enquiry::where('fb_lead_id', $fbLeadId)->exists()) {
-                    $duplicateCount++;
-                    continue;
+                // Check for existing lead
+                if ($fbLeadId) {
+                    $existing = Enquiry::where('fb_lead_id', $fbLeadId)->first();
+                    if ($existing) {
+                        // Backfill missing fields on the existing record
+                        $updates = [];
+
+                        if (empty($existing->fb_created_at) && isset($mapping['fb_created_at']) && !empty($data[$mapping['fb_created_at']])) {
+                            $updates['fb_created_at'] = \Carbon\Carbon::parse($data[$mapping['fb_created_at']]);
+                        }
+                        if (empty($existing->fb_timeline) && isset($mapping['priority_answer']) && !empty($data[$mapping['priority_answer']])) {
+                            $updates['fb_timeline'] = $data[$mapping['priority_answer']];
+                        }
+                        if (empty($existing->fb_campaign_name) && isset($mapping['fb_campaign_name']) && !empty($data[$mapping['fb_campaign_name']])) {
+                            $updates['fb_campaign_name'] = $data[$mapping['fb_campaign_name']];
+                        }
+                        if (empty($existing->fb_form_name) && isset($mapping['fb_form_name']) && !empty($data[$mapping['fb_form_name']])) {
+                            $updates['fb_form_name'] = $data[$mapping['fb_form_name']];
+                        }
+                        if (empty($existing->fb_platform) && isset($mapping['fb_platform']) && !empty($data[$mapping['fb_platform']])) {
+                            $updates['fb_platform'] = $data[$mapping['fb_platform']];
+                        }
+
+                        if (!empty($updates)) {
+                            $existing->update($updates);
+                            $updatedCount++;
+                        } else {
+                            $duplicateCount++;
+                        }
+                        continue;
+                    }
                 }
 
                 $enquiryData = [
@@ -184,6 +212,7 @@ class FacebookLeadImportController extends Controller
 
         return $this->success([
             'imported' => $importedCount,
+            'updated' => $updatedCount,
             'duplicates' => $duplicateCount,
             'errors' => $errorCount
         ], 'Import completed successfully');

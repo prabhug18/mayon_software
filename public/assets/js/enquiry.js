@@ -29,7 +29,14 @@ window.Enquiry = (function () {
                     render: function (row) {
                         let source = (row.source && row.source.name) || '-';
                         if (row.fb_lead_id) {
-                            return `<span class="badge" style="background-color: #e7f1ff; color: #0d6efd; border: 1px solid #9ec5fe; padding: 0.4em 0.6em;"><i class="bi bi-facebook me-1"></i> Facebook</span>`;
+                            let fbDate = '';
+                            if (row.fb_created_at) {
+                                try {
+                                    const d = new Date(row.fb_created_at);
+                                    fbDate = `<br><small class="text-muted" style="font-size: 0.75rem;">Created: ${d.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small>`;
+                                } catch (e) { }
+                            }
+                            return `<span class="badge" style="background-color: #e7f1ff; color: #0d6efd; border: 1px solid #9ec5fe; padding: 0.4em 0.6em;"><i class="bi bi-facebook me-1"></i> Facebook</span>${fbDate}`;
                         }
                         return source;
                     }
