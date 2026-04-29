@@ -129,6 +129,7 @@ class FacebookLeadImportController extends Controller
                     'fb_campaign_name' => $data[$mapping['fb_campaign_name']] ?? null,
                     'fb_form_name' => $data[$mapping['fb_form_name']] ?? null,
                     'fb_platform' => $data[$mapping['fb_platform']] ?? null,
+                    'fb_timeline' => $data[$mapping['priority_answer']] ?? null,
                     'name' => $data[$mapping['name']] ?? 'Unknown',
                     'email' => $data[$mapping['email']] ?? null,
                     'mobile' => $this->cleanPhone($data[$mapping['mobile']] ?? null),

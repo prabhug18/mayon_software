@@ -58,6 +58,11 @@
                                 <strong>Status:</strong> 
                                 <span class="badge bg-secondary ms-1">{{ $enquiry->status }}</span>
                             </div>
+                            @if($enquiry->fb_timeline)
+                            <div class="mb-2">
+                                <strong>Timeline:</strong> <span class="ms-1 text-primary fw-bold">{{ $enquiry->fb_timeline }}</span>
+                            </div>
+                            @endif
                         </div>
                     </div>
 
