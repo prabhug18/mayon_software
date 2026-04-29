@@ -1,4 +1,4 @@
-/* sidebar */
+﻿/* sidebar */
 body {
   font-family: 'Segoe UI', Roboto, sans-serif;
   background-color: #f0f2f5;
@@ -1303,3 +1303,12 @@ body {
   border-top-right-radius: 0.5rem !important;
   border-bottom-right-radius: 0.5rem !important;
 }
+
+/* Fix for modal going behind header */
+.modal-backdrop {
+    z-index: 1250 !important;
+}
+.modal {
+    z-index: 1300 !important;
+}
+

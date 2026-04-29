@@ -109,10 +109,21 @@
                                                         @foreach($activity->changes['attributes'] as $key => $value)
                                                             @if($key != 'updated_at' && $key != 'created_at')
                                                                 <li>
+                                                                    @php
+                                                                        $formatVal = function($k, $v) {
+                                                                            if ($v === null || $v === '') return 'empty';
+                                                                            if (is_string($v) && (str_ends_with($k, '_at') || str_ends_with($k, 'date') || preg_match('/^\d{4}-\d{2}-\d{2}T/', $v))) {
+                                                                                try {
+                                                                                    return \Carbon\Carbon::parse($v)->format('M j, Y h:i A');
+                                                                                } catch (\Exception $e) {}
+                                                                            }
+                                                                            return is_array($v) ? json_encode($v) : $v;
+                                                                        };
+                                                                    @endphp
                                                                     <strong>{{ ucfirst(str_replace('_', ' ', $key)) }}:</strong> 
-                                                                    <span class="text-decoration-line-through text-danger">{{ $activity->changes['old'][$key] ?? 'empty' }}</span> 
+                                                                    <span class="text-decoration-line-through text-danger">{{ $formatVal($key, $activity->changes['old'][$key] ?? null) }}</span> 
                                                                     <i class="bi bi-arrow-right"></i> 
-                                                                    <span class="text-success">{{ $value ?? 'empty' }}</span>
+                                                                    <span class="text-success">{{ $formatVal($key, $value ?? null) }}</span>
                                                                 </li>
                                                             @endif
                                                         @endforeach
