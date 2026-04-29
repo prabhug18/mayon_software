@@ -116,7 +116,10 @@ Route::middleware('auth')->group(function () {
         Route::resource('purchaseOrders', App\Http\Controllers\Module\PurchaseOrderController::class);
     });
 
-    // Dashboard follow-ups JSON (today)
+    // Dashboard AJAX routes for Modals
+    Route::get('dashboard/enquiries/modal', [GeneralController::class, 'enquiriesList'])->name('dashboard.enquiries.modal');
+    Route::get('dashboard/quotations/modal', [GeneralController::class, 'quotationsList'])->name('dashboard.quotations.modal');
+    Route::get('dashboard/purchase-orders/modal', [GeneralController::class, 'purchaseOrdersList'])->name('dashboard.purchaseOrders.modal');
     Route::get('dashboard/followups/today', [GeneralController::class, 'todayFollowUps'])->name('dashboard.followups.today');
 });
 
