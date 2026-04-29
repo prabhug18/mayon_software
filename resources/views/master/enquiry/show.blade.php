@@ -119,11 +119,15 @@
                                                                             }
                                                                             return is_array($v) ? json_encode($v) : $v;
                                                                         };
+                                                                        $oldVal = $formatVal($key, $activity->changes['old'][$key] ?? null);
+                                                                        $newVal = $formatVal($key, $value ?? null);
                                                                     @endphp
                                                                     <strong>{{ ucfirst(str_replace('_', ' ', $key)) }}:</strong> 
-                                                                    <span class="text-decoration-line-through text-danger">{{ $formatVal($key, $activity->changes['old'][$key] ?? null) }}</span> 
-                                                                    <i class="bi bi-arrow-right"></i> 
-                                                                    <span class="text-success">{{ $formatVal($key, $value ?? null) }}</span>
+                                                                    @if($oldVal !== 'empty')
+                                                                        <span class="text-decoration-line-through text-danger">{{ $oldVal }}</span> 
+                                                                        <i class="bi bi-arrow-right mx-1"></i> 
+                                                                    @endif
+                                                                    <span class="{{ $newVal === 'empty' ? 'text-muted fst-italic' : 'text-success' }}">{{ $newVal === 'empty' ? 'Removed' : $newVal }}</span>
                                                                 </li>
                                                             @endif
                                                         @endforeach
