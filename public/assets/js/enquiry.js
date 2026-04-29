@@ -25,6 +25,16 @@ window.Enquiry = (function () {
                     }
                 },
                 { 
+                    data: null,
+                    render: function (row) {
+                        let source = (row.source && row.source.name) || '-';
+                        if (row.fb_lead_id) {
+                            return `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 py-1 px-2"><i class="bi bi-facebook me-1"></i> Facebook</span>`;
+                        }
+                        return source;
+                    }
+                },
+                { 
                     data: 'priority',
                     render: function (p) {
                         let cls = 'bg-info text-dark';

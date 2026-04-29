@@ -16,7 +16,8 @@ class Enquiry extends Model
     protected $fillable = [
         'mobile', 'name', 'email', 'location', 'gstin', 'address',
         'enquiry_type_id', 'description', 'status', 'priority', 'assigned_to',
-        'source_id', 'service_id', 'service_item_id', 'next_follow_up_at', 'reminder_notes', 'project_id'
+        'source_id', 'service_id', 'service_item_id', 'next_follow_up_at', 'reminder_notes', 'project_id',
+        'fb_lead_id', 'fb_campaign_name', 'fb_form_name', 'fb_platform'
     ];
 
     protected $casts = [

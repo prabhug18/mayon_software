@@ -85,6 +85,10 @@ Route::middleware('auth')->group(function () {
 
     // Enquiry Management
     Route::middleware(['permission:view enquiries'])->group(function () {
+        Route::get('enquiries/import', [App\Http\Controllers\FacebookLeadImportController::class, 'showImportForm'])->name('enquiries.import');
+        Route::post('enquiries/import/preview', [App\Http\Controllers\FacebookLeadImportController::class, 'preview'])->name('enquiries.import.preview');
+        Route::post('enquiries/import/process', [App\Http\Controllers\FacebookLeadImportController::class, 'import'])->name('enquiries.import.process');
+
         Route::resource('enquiries', App\Http\Controllers\EnquiryController::class);
         Route::post('enquiries/check-name', [App\Http\Controllers\EnquiryController::class, 'checkName'])->name('enquiries.checkName');
         Route::post('enquiries/{id}/comments', [App\Http\Controllers\EnquiryController::class, 'storeComment'])->name('enquiries.comments.store');

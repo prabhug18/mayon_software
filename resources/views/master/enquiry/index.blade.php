@@ -7,9 +7,14 @@
             <div class="section-title mb-0">
                 <i class="bi bi-person-lines-fill me-2"></i> Enquiries
             </div>
-            <a href="{{ route('enquiries.create') }}" class="btn btn-custom px-4">
-                <i class="bi bi-plus-lg me-1"></i> New Enquiry
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('enquiries.import') }}" class="btn btn-outline-primary px-4">
+                    <i class="bi bi-facebook me-1"></i> Import Facebook Leads
+                </a>
+                <a href="{{ route('enquiries.create') }}" class="btn btn-custom px-4">
+                    <i class="bi bi-plus-lg me-1"></i> New Enquiry
+                </a>
+            </div>
         </div>
         
         <div class="table-responsive">
@@ -19,6 +24,7 @@
                         <th>ID</th>
                         <th>Name / Mobile</th>
                         <th>Service & Item</th>
+                        <th>Source</th>
                         <th>Priority</th>
                         <th>Status</th>
                         <th>Assigned To</th>
