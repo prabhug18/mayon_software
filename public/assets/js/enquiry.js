@@ -4,19 +4,19 @@ window.Enquiry = (function () {
         const table = $(selector).DataTable({
             ajax: { url: '/enquiries', dataSrc: 'data' },
             columns: [
-                { 
+                {
                     data: null,
                     render: function (data, type, row, meta) {
                         return meta.row + meta.settings._iDisplayStart + 1;
                     }
                 },
-                { 
+                {
                     data: null,
                     render: function (row) {
                         return `<strong>${row.name}</strong><br><small class="text-muted">${row.mobile || ''}</small>`;
                     }
                 },
-                { 
+                {
                     data: null,
                     render: function (row) {
                         const s = (row.service && row.service.name) || '-';
@@ -24,17 +24,17 @@ window.Enquiry = (function () {
                         return `${s}${i ? '<br><small class="text-muted">' + i + '</small>' : ''}`;
                     }
                 },
-                { 
+                {
                     data: null,
                     render: function (row) {
                         let source = (row.source && row.source.name) || '-';
                         if (row.fb_lead_id) {
-                            return `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 py-1 px-2"><i class="bi bi-facebook me-1"></i> Facebook</span>`;
+                            return `<span class="badge" style="background-color: #e7f1ff; color: #0d6efd; border: 1px solid #9ec5fe; padding: 0.4em 0.6em;"><i class="bi bi-facebook me-1"></i> Facebook</span>`;
                         }
                         return source;
                     }
                 },
-                { 
+                {
                     data: 'priority',
                     render: function (p) {
                         let cls = 'bg-info text-dark';
@@ -43,7 +43,7 @@ window.Enquiry = (function () {
                         return `<span class="badge ${cls} extra-small">${p || 'Medium'}</span>`;
                     }
                 },
-                { 
+                {
                     data: 'status',
                     render: function (s) {
                         let cls = 'bg-secondary';
@@ -53,17 +53,17 @@ window.Enquiry = (function () {
                         return `<span class="badge ${cls} extra-small">${s || 'Open'}</span>`;
                     }
                 },
-                { 
+                {
                     data: null,
                     render: function (row) {
                         return (row.assigned_to && row.assigned_to.name) || '<span class="text-muted small">Unassigned</span>';
                     }
                 },
-                { 
+                {
                     data: 'next_follow_up_at',
                     render: function (dt) {
                         if (!dt) return '-';
-                        try { const d = new Date(dt); return d.toLocaleString([], {dateStyle: 'medium', timeStyle: 'short'}); } catch (e) { return dt; }
+                        try { const d = new Date(dt); return d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }); } catch (e) { return dt; }
                     }
                 },
                 {
@@ -151,7 +151,7 @@ window.Enquiry = (function () {
     }
 
     function confirmDelete(id) { deleteTargetId = id; new bootstrap.Modal(document.getElementById('deleteModal')).show(); document.getElementById('deleteModalConfirmBtn').onclick = performDelete; }
-    
+
     // Alias for confirmDelete to match show page
     function deleteEnquiry(id) { confirmDelete(id); }
 
@@ -172,7 +172,7 @@ window.Enquiry = (function () {
                         showAlert('Comment added');
                         document.getElementById('comment-body').value = '';
                         // Refresh to show in comments tab or just reload
-                        location.reload(); 
+                        location.reload();
                     })
                     .catch(function (err) { if (err && err.validation && err.validation.errors) { const errors = err.validation.errors; for (const k in errors) { const el = document.getElementById(k + '-error'); if (el) el.textContent = errors[k][0]; const inp = document.getElementById(k); if (inp) inp.classList.add('is-invalid'); } } else { showAlert('Error posting comment'); } });
             });

@@ -2,6 +2,11 @@
 
 @section('title', 'Import Facebook Leads')
 
+@push('head')
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@endpush
+
 @section('content')
 <div class="container-fluid py-4">
     <div class="row justify-content-center">
@@ -268,12 +273,28 @@ $(function() {
                     // Try to auto-guess
                     const keywords = fieldMapKeywords[field];
                     if (keywords) {
-                        headers.forEach(h => {
-                            const hl = h.toLowerCase();
-                            if (keywords.some(k => hl.includes(k))) {
-                                sel.val(h);
-                            }
-                        });
+                        // First try exact match
+                        let matched = headers.find(h => keywords.includes(h.toLowerCase()));
+                        
+                        // If no exact match, try a stricter includes (word boundaries)
+                        if (!matched) {
+                            matched = headers.find(h => {
+                                const hl = h.toLowerCase();
+                                return keywords.some(k => hl === k || hl.startsWith(k + '_') || hl.endsWith('_' + k) || hl.includes(' ' + k + ' '));
+                            });
+                        }
+                        
+                        // Fallback to basic includes if still nothing, but be careful with 'id'
+                        if (!matched && field !== 'fb_lead_id') {
+                             matched = headers.find(h => {
+                                const hl = h.toLowerCase();
+                                return keywords.some(k => hl.includes(k));
+                            });
+                        }
+
+                        if (matched) {
+                            sel.val(matched);
+                        }
                     }
                 });
 

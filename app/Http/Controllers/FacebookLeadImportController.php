@@ -30,25 +30,41 @@ class FacebookLeadImportController extends Controller
 
         $path = $request->file('file')->getRealPath();
         
+        // Read file content and detect encoding
+        $content = file_get_contents($path);
+        $encoding = mb_detect_encoding($content, ['UTF-8', 'UTF-16', 'UTF-16LE', 'UTF-16BE', 'ISO-8859-1'], true);
+        
+        if ($encoding && $encoding !== 'UTF-8') {
+            $content = mb_convert_encoding($content, 'UTF-8', $encoding);
+            // Save converted content back to temp file for processing
+            file_put_contents($path, $content);
+        }
+
         // Detect delimiter
-        $file = fopen($path, 'r');
-        $firstLine = fgets($file);
-        fclose($file);
+        $lines = explode("\n", $content);
+        $firstLine = $lines[0] ?? '';
         $delimiter = strpos($firstLine, "\t") !== false ? "\t" : ",";
 
+        // Re-read file with fgetcsv for proper parsing
         $file = fopen($path, 'r');
         $headers = fgetcsv($file, 0, $delimiter);
         
         $previewData = [];
         $count = 0;
         while (($row = fgetcsv($file, 0, $delimiter)) !== false && $count < 5) {
-            $previewData[] = array_combine($headers, array_pad($row, count($headers), ''));
+            if (count($headers) == count($row)) {
+                $previewData[] = array_combine($headers, $row);
+            } else {
+                $previewData[] = array_combine($headers, array_pad($row, count($headers), ''));
+            }
             $count++;
         }
         fclose($file);
 
         // Store file temporarily
         $tempPath = $request->file('file')->store('temp');
+        // Ensure the stored temp file is also UTF-8
+        \Illuminate\Support\Facades\Storage::put($tempPath, $content);
 
         return response()->json([
             'status' => 'success',
@@ -64,18 +80,26 @@ class FacebookLeadImportController extends Controller
         $request->validate([
             'temp_path' => 'required|string',
             'mapping' => 'required|array',
-            'delimiter' => 'required|string'
         ]);
 
         $mapping = $request->input('mapping');
-        $tempPath = storage_path('app/' . $request->input('temp_path'));
-        $delimiter = $request->input('delimiter');
+        $tempPath = $request->input('temp_path');
 
-        if (!file_exists($tempPath)) {
+        if (!\Illuminate\Support\Facades\Storage::exists($tempPath)) {
             return $this->error('File expired or not found. Please upload again.', 422);
         }
 
-        $file = fopen($tempPath, 'r');
+        $content = \Illuminate\Support\Facades\Storage::get($tempPath);
+        
+        // Auto-detect delimiter from the first line of stored content
+        $lines = explode("\n", $content);
+        $firstLine = $lines[0] ?? '';
+        $delimiter = strpos($firstLine, "\t") !== false ? "\t" : ",";
+
+        $file = fopen('php://temp', 'r+');
+        fwrite($file, $content);
+        rewind($file);
+
         $headers = fgetcsv($file, 0, $delimiter);
         
         $fbSource = Source::firstOrCreate(['name' => 'Facebook']);
@@ -123,22 +147,33 @@ class FacebookLeadImportController extends Controller
                 }
 
                 // Service Mapping
+                $description = "";
                 if (isset($mapping['service_answer'])) {
-                    $answer = strtolower($data[$mapping['service_answer']] ?? '');
-                    $matchedService = $services->first(function($s) use ($answer) {
-                        return strpos($answer, strtolower($s->name)) !== false;
+                    $sAnswer = $data[$mapping['service_answer']] ?? '';
+                    $description .= "Requirement: " . $sAnswer;
+                    
+                    $answerLower = strtolower($sAnswer);
+                    $matchedService = $services->first(function($s) use ($answerLower) {
+                        return strpos($answerLower, strtolower($s->name)) !== false;
                     });
                     if ($matchedService) {
                         $enquiryData['service_id'] = $matchedService->id;
                     }
-                    $enquiryData['description'] = "Requirement: " . ($data[$mapping['service_answer']] ?? '');
                 }
+
+                if (isset($mapping['priority_answer'])) {
+                    $pAnswer = $data[$mapping['priority_answer']] ?? '';
+                    if ($description) $description .= "\n";
+                    $description .= "Timeline: " . $pAnswer;
+                }
+                
+                $enquiryData['description'] = trim($description);
 
                 Enquiry::create($enquiryData);
                 $importedCount++;
             }
             DB::commit();
-            unlink($tempPath);
+            \Illuminate\Support\Facades\Storage::delete($tempPath);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Import error: ' . $e->getMessage());
