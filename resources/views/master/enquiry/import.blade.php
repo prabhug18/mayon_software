@@ -108,9 +108,13 @@
                                         <label class="form-label fw-bold small text-muted mb-1">Form Name</label>
                                         <select class="form-select mapping-select rounded-3" data-field="fb_form_name"></select>
                                     </div>
-                                    <div class="mb-0">
+                                    <div class="mb-4">
                                         <label class="form-label fw-bold small text-muted mb-1">Platform (FB/IG)</label>
                                         <select class="form-select mapping-select rounded-3" data-field="fb_platform"></select>
+                                    </div>
+                                    <div class="mb-0">
+                                        <label class="form-label fw-bold small text-muted mb-1">Lead Created Time</label>
+                                        <select class="form-select mapping-select rounded-3" data-field="fb_created_at"></select>
                                     </div>
                                 </div>
                             </div>
@@ -226,6 +230,7 @@ $(function() {
         'fb_campaign_name': ['campaign_name', 'campaign name', 'campaign'],
         'fb_form_name': ['form_name', 'form name', 'form'],
         'fb_platform': ['platform'],
+        'fb_created_at': ['created_time', 'created time', 'date'],
         'service_answer': ['flooring_type', 'required', 'requirement', 'service'],
         'priority_answer': ['when', 'planning', 'start', 'timeline']
     };

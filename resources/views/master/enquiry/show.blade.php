@@ -176,8 +176,14 @@
                         <label class="small text-muted mb-1">Lead Source</label>
                         <div class="small fw-bold"><i class="bi bi-box-arrow-in-right me-1"></i> {{ optional($enquiry->source)->name ?? 'Unknown' }}</div>
                     </div>
+                    @if($enquiry->fb_created_at)
+                    <div class="mb-3">
+                        <label class="small text-muted mb-1">Lead Creation Date (FB)</label>
+                        <div class="small fw-bold"><i class="bi bi-facebook me-1"></i> {{ $enquiry->fb_created_at->format('M j, Y H:i') }}</div>
+                    </div>
+                    @endif
                     <div>
-                        <label class="small text-muted mb-1">Enquiry Date</label>
+                        <label class="small text-muted mb-1">Enquiry Date (System)</label>
                         <div class="small fw-bold"><i class="bi bi-calendar-check me-1"></i> {{ optional($enquiry->created_at)->format('M j, Y H:i') }}</div>
                     </div>
                 </div>

@@ -130,6 +130,7 @@ class FacebookLeadImportController extends Controller
                     'fb_form_name' => $data[$mapping['fb_form_name']] ?? null,
                     'fb_platform' => $data[$mapping['fb_platform']] ?? null,
                     'fb_timeline' => $data[$mapping['priority_answer']] ?? null,
+                    'fb_created_at' => isset($mapping['fb_created_at']) && !empty($data[$mapping['fb_created_at']]) ? \Carbon\Carbon::parse($data[$mapping['fb_created_at']]) : null,
                     'name' => $data[$mapping['name']] ?? 'Unknown',
                     'email' => $data[$mapping['email']] ?? null,
                     'mobile' => $this->cleanPhone($data[$mapping['mobile']] ?? null),
