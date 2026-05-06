@@ -119,8 +119,7 @@ class FacebookLeadImportController extends Controller
         DB::beginTransaction();
         try {
             if (in_array($extension, ['xls', 'xlsx'])) {
-                $path = storage_path('app/' . $tempPath);
-                $data = \Maatwebsite\Excel\Facades\Excel::toArray(new \stdClass, $path)[0] ?? [];
+                $data = \Maatwebsite\Excel\Facades\Excel::toArray(new \stdClass, $tempPath)[0] ?? [];
                 if (!empty($data)) {
                     $headers = $data[0] ?? [];
                     $rows = array_slice($data, 1);
