@@ -38,7 +38,8 @@ class FacebookLeadImportController extends Controller
         $previewData = [];
 
         if (in_array($extension, ['xls', 'xlsx'])) {
-            $data = \Maatwebsite\Excel\Facades\Excel::toArray(new \stdClass, $path)[0] ?? [];
+            $readerType = $extension === 'xlsx' ? \Maatwebsite\Excel\Excel::XLSX : \Maatwebsite\Excel\Excel::XLS;
+            $data = \Maatwebsite\Excel\Facades\Excel::toArray(new \stdClass, $path, null, $readerType)[0] ?? [];
             if (!empty($data)) {
                 $headers = $data[0] ?? [];
                 $rows = array_slice($data, 1, 5);
