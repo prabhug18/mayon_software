@@ -25,46 +25,64 @@ class FacebookLeadImportController extends Controller
     public function preview(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:csv,txt'
+            'file' => 'required|file|mimes:csv,txt,xls,xlsx'
         ]);
 
-        $path = $request->file('file')->getRealPath();
+        $file = $request->file('file');
+        $extension = strtolower($file->getClientOriginalExtension());
+        $path = $file->getRealPath();
         
-        // Read file content and detect encoding
-        $content = file_get_contents($path);
-        $encoding = mb_detect_encoding($content, ['UTF-8', 'UTF-16', 'UTF-16LE', 'UTF-16BE', 'ISO-8859-1'], true);
-        
-        if ($encoding && $encoding !== 'UTF-8') {
-            $content = mb_convert_encoding($content, 'UTF-8', $encoding);
-            // Save converted content back to temp file for processing
-            file_put_contents($path, $content);
-        }
-
-        // Detect delimiter
-        $lines = explode("\n", $content);
-        $firstLine = $lines[0] ?? '';
-        $delimiter = strpos($firstLine, "\t") !== false ? "\t" : ",";
-
-        // Re-read file with fgetcsv for proper parsing
-        $file = fopen($path, 'r');
-        $headers = fgetcsv($file, 0, $delimiter);
-        
+        $tempFileName = uniqid() . '.' . $extension;
+        $delimiter = ',';
+        $headers = [];
         $previewData = [];
-        $count = 0;
-        while (($row = fgetcsv($file, 0, $delimiter)) !== false && $count < 5) {
-            if (count($headers) == count($row)) {
-                $previewData[] = array_combine($headers, $row);
-            } else {
-                $previewData[] = array_combine($headers, array_pad($row, count($headers), ''));
-            }
-            $count++;
-        }
-        fclose($file);
 
-        // Store file temporarily
-        $tempPath = $request->file('file')->store('temp');
-        // Ensure the stored temp file is also UTF-8
-        \Illuminate\Support\Facades\Storage::put($tempPath, $content);
+        if (in_array($extension, ['xls', 'xlsx'])) {
+            $data = \Maatwebsite\Excel\Facades\Excel::toArray(new \stdClass, $path)[0] ?? [];
+            if (!empty($data)) {
+                $headers = $data[0] ?? [];
+                $rows = array_slice($data, 1, 5);
+                foreach ($rows as $row) {
+                    $previewData[] = array_combine($headers, array_pad($row, count($headers), ''));
+                }
+            }
+            $tempPath = $file->storeAs('temp', $tempFileName);
+        } else {
+            // Read file content and detect encoding
+            $content = file_get_contents($path);
+            $encoding = mb_detect_encoding($content, ['UTF-8', 'UTF-16', 'UTF-16LE', 'UTF-16BE', 'ISO-8859-1'], true);
+            
+            if ($encoding && $encoding !== 'UTF-8') {
+                $content = mb_convert_encoding($content, 'UTF-8', $encoding);
+                // Save converted content back to temp file for processing
+                file_put_contents($path, $content);
+            }
+
+            // Detect delimiter
+            $lines = explode("\n", $content);
+            $firstLine = $lines[0] ?? '';
+            $delimiter = strpos($firstLine, "\t") !== false ? "\t" : ",";
+
+            // Re-read file with fgetcsv for proper parsing
+            $csvFile = fopen($path, 'r');
+            $headers = fgetcsv($csvFile, 0, $delimiter);
+            
+            $count = 0;
+            while (($row = fgetcsv($csvFile, 0, $delimiter)) !== false && $count < 5) {
+                if (count($headers) == count($row)) {
+                    $previewData[] = array_combine($headers, $row);
+                } else {
+                    $previewData[] = array_combine($headers, array_pad($row, count($headers), ''));
+                }
+                $count++;
+            }
+            fclose($csvFile);
+
+            // Store file temporarily
+            $tempPath = $file->storeAs('temp', $tempFileName);
+            // Ensure the stored temp file is also UTF-8
+            \Illuminate\Support\Facades\Storage::put(storage_path('app/' . $tempPath), $content);
+        }
 
         return response()->json([
             'status' => 'success',
@@ -89,19 +107,7 @@ class FacebookLeadImportController extends Controller
             return $this->error('File expired or not found. Please upload again.', 422);
         }
 
-        $content = \Illuminate\Support\Facades\Storage::get($tempPath);
-        
-        // Auto-detect delimiter from the first line of stored content
-        $lines = explode("\n", $content);
-        $firstLine = $lines[0] ?? '';
-        $delimiter = strpos($firstLine, "\t") !== false ? "\t" : ",";
-
-        $file = fopen('php://temp', 'r+');
-        fwrite($file, $content);
-        rewind($file);
-
-        $headers = fgetcsv($file, 0, $delimiter);
-        
+        $extension = strtolower(pathinfo($tempPath, PATHINFO_EXTENSION));
         $fbSource = Source::firstOrCreate(['name' => 'Facebook']);
         $services = Service::all();
 
@@ -112,95 +118,35 @@ class FacebookLeadImportController extends Controller
 
         DB::beginTransaction();
         try {
-            while (($row = fgetcsv($file, 0, $delimiter)) !== false) {
-                $data = array_combine($headers, array_pad($row, count($headers), ''));
-                
-                $fbLeadId = $data[$mapping['fb_lead_id']] ?? null;
-                
-                // Check for existing lead
-                if ($fbLeadId) {
-                    $existing = Enquiry::where('fb_lead_id', $fbLeadId)->first();
-                    if ($existing) {
-                        // Backfill missing fields on the existing record
-                        $updates = [];
-
-                        if (empty($existing->fb_created_at) && isset($mapping['fb_created_at']) && !empty($data[$mapping['fb_created_at']])) {
-                            $updates['fb_created_at'] = \Carbon\Carbon::parse($data[$mapping['fb_created_at']]);
-                        }
-                        if (empty($existing->fb_timeline) && isset($mapping['priority_answer']) && !empty($data[$mapping['priority_answer']])) {
-                            $updates['fb_timeline'] = $data[$mapping['priority_answer']];
-                        }
-                        if (empty($existing->fb_campaign_name) && isset($mapping['fb_campaign_name']) && !empty($data[$mapping['fb_campaign_name']])) {
-                            $updates['fb_campaign_name'] = $data[$mapping['fb_campaign_name']];
-                        }
-                        if (empty($existing->fb_form_name) && isset($mapping['fb_form_name']) && !empty($data[$mapping['fb_form_name']])) {
-                            $updates['fb_form_name'] = $data[$mapping['fb_form_name']];
-                        }
-                        if (empty($existing->fb_platform) && isset($mapping['fb_platform']) && !empty($data[$mapping['fb_platform']])) {
-                            $updates['fb_platform'] = $data[$mapping['fb_platform']];
-                        }
-
-                        if (!empty($updates)) {
-                            $existing->update($updates);
-                            $updatedCount++;
-                        } else {
-                            $duplicateCount++;
-                        }
-                        continue;
+            if (in_array($extension, ['xls', 'xlsx'])) {
+                $path = storage_path('app/' . $tempPath);
+                $data = \Maatwebsite\Excel\Facades\Excel::toArray(new \stdClass, $path)[0] ?? [];
+                if (!empty($data)) {
+                    $headers = $data[0] ?? [];
+                    $rows = array_slice($data, 1);
+                    foreach ($rows as $row) {
+                        if (empty(array_filter($row))) continue;
+                        $rowData = array_combine($headers, array_pad($row, count($headers), ''));
+                        $this->processRow($rowData, $mapping, $fbSource, $services, $importedCount, $updatedCount, $duplicateCount);
                     }
                 }
+            } else {
+                $content = \Illuminate\Support\Facades\Storage::get($tempPath);
+                $lines = explode("\n", $content);
+                $firstLine = $lines[0] ?? '';
+                $delimiter = strpos($firstLine, "\t") !== false ? "\t" : ",";
 
-                $enquiryData = [
-                    'source_id' => $fbSource->id,
-                    'status' => 'Open',
-                    'fb_lead_id' => $fbLeadId,
-                    'fb_campaign_name' => $data[$mapping['fb_campaign_name']] ?? null,
-                    'fb_form_name' => $data[$mapping['fb_form_name']] ?? null,
-                    'fb_platform' => $data[$mapping['fb_platform']] ?? null,
-                    'fb_timeline' => $data[$mapping['priority_answer']] ?? null,
-                    'fb_created_at' => isset($mapping['fb_created_at']) && !empty($data[$mapping['fb_created_at']]) ? \Carbon\Carbon::parse($data[$mapping['fb_created_at']]) : null,
-                    'name' => $data[$mapping['name']] ?? 'Unknown',
-                    'email' => $data[$mapping['email']] ?? null,
-                    'mobile' => $this->cleanPhone($data[$mapping['mobile']] ?? null),
-                ];
+                $csvFile = fopen('php://temp', 'r+');
+                fwrite($csvFile, $content);
+                rewind($csvFile);
 
-                // Priority Mapping
-                if (isset($mapping['priority_answer'])) {
-                    $answer = strtolower($data[$mapping['priority_answer']] ?? '');
-                    if (strpos($answer, '30_days') !== false) {
-                        $enquiryData['priority'] = 'High';
-                    } elseif (strpos($answer, 'months') !== false) {
-                        $enquiryData['priority'] = 'Medium';
-                    } else {
-                        $enquiryData['priority'] = 'Low';
-                    }
+                $headers = fgetcsv($csvFile, 0, $delimiter);
+                while (($row = fgetcsv($csvFile, 0, $delimiter)) !== false) {
+                    if (empty(array_filter($row))) continue;
+                    $rowData = array_combine($headers, array_pad($row, count($headers), ''));
+                    $this->processRow($rowData, $mapping, $fbSource, $services, $importedCount, $updatedCount, $duplicateCount);
                 }
-
-                // Service Mapping
-                $description = "";
-                if (isset($mapping['service_answer'])) {
-                    $sAnswer = $data[$mapping['service_answer']] ?? '';
-                    $description .= "Requirement: " . $sAnswer;
-                    
-                    $answerLower = strtolower($sAnswer);
-                    $matchedService = $services->first(function($s) use ($answerLower) {
-                        return strpos($answerLower, strtolower($s->name)) !== false;
-                    });
-                    if ($matchedService) {
-                        $enquiryData['service_id'] = $matchedService->id;
-                    }
-                }
-
-                if (isset($mapping['priority_answer'])) {
-                    $pAnswer = $data[$mapping['priority_answer']] ?? '';
-                    if ($description) $description .= "\n";
-                    $description .= "Timeline: " . $pAnswer;
-                }
-                
-                $enquiryData['description'] = trim($description);
-
-                Enquiry::create($enquiryData);
-                $importedCount++;
+                fclose($csvFile);
             }
             DB::commit();
             \Illuminate\Support\Facades\Storage::delete($tempPath);
@@ -216,6 +162,96 @@ class FacebookLeadImportController extends Controller
             'duplicates' => $duplicateCount,
             'errors' => $errorCount
         ], 'Import completed successfully');
+    }
+
+    private function processRow($data, $mapping, $fbSource, $services, &$importedCount, &$updatedCount, &$duplicateCount)
+    {
+        $fbLeadId = $data[$mapping['fb_lead_id']] ?? null;
+        
+        // Check for existing lead
+        if ($fbLeadId) {
+            $existing = Enquiry::where('fb_lead_id', $fbLeadId)->first();
+            if ($existing) {
+                // Backfill missing fields on the existing record
+                $updates = [];
+
+                if (empty($existing->fb_created_at) && isset($mapping['fb_created_at']) && !empty($data[$mapping['fb_created_at']])) {
+                    $updates['fb_created_at'] = \Carbon\Carbon::parse($data[$mapping['fb_created_at']]);
+                }
+                if (empty($existing->fb_timeline) && isset($mapping['priority_answer']) && !empty($data[$mapping['priority_answer']])) {
+                    $updates['fb_timeline'] = $data[$mapping['priority_answer']];
+                }
+                if (empty($existing->fb_campaign_name) && isset($mapping['fb_campaign_name']) && !empty($data[$mapping['fb_campaign_name']])) {
+                    $updates['fb_campaign_name'] = $data[$mapping['fb_campaign_name']];
+                }
+                if (empty($existing->fb_form_name) && isset($mapping['fb_form_name']) && !empty($data[$mapping['fb_form_name']])) {
+                    $updates['fb_form_name'] = $data[$mapping['fb_form_name']];
+                }
+                if (empty($existing->fb_platform) && isset($mapping['fb_platform']) && !empty($data[$mapping['fb_platform']])) {
+                    $updates['fb_platform'] = $data[$mapping['fb_platform']];
+                }
+
+                if (!empty($updates)) {
+                    $existing->update($updates);
+                    $updatedCount++;
+                } else {
+                    $duplicateCount++;
+                }
+                return;
+            }
+        }
+
+        $enquiryData = [
+            'source_id' => $fbSource->id,
+            'status' => 'Open',
+            'fb_lead_id' => $fbLeadId,
+            'fb_campaign_name' => $data[$mapping['fb_campaign_name']] ?? null,
+            'fb_form_name' => $data[$mapping['fb_form_name']] ?? null,
+            'fb_platform' => $data[$mapping['fb_platform']] ?? null,
+            'fb_timeline' => $data[$mapping['priority_answer']] ?? null,
+            'fb_created_at' => isset($mapping['fb_created_at']) && !empty($data[$mapping['fb_created_at']]) ? \Carbon\Carbon::parse($data[$mapping['fb_created_at']]) : null,
+            'name' => $data[$mapping['name']] ?? 'Unknown',
+            'email' => $data[$mapping['email']] ?? null,
+            'mobile' => $this->cleanPhone($data[$mapping['mobile']] ?? null),
+        ];
+
+        // Priority Mapping
+        if (isset($mapping['priority_answer'])) {
+            $answer = strtolower($data[$mapping['priority_answer']] ?? '');
+            if (strpos($answer, '30_days') !== false) {
+                $enquiryData['priority'] = 'High';
+            } elseif (strpos($answer, 'months') !== false) {
+                $enquiryData['priority'] = 'Medium';
+            } else {
+                $enquiryData['priority'] = 'Low';
+            }
+        }
+
+        // Service Mapping
+        $description = "";
+        if (isset($mapping['service_answer'])) {
+            $sAnswer = $data[$mapping['service_answer']] ?? '';
+            $description .= "Requirement: " . $sAnswer;
+            
+            $answerLower = strtolower($sAnswer);
+            $matchedService = $services->first(function($s) use ($answerLower) {
+                return strpos($answerLower, strtolower($s->name)) !== false;
+            });
+            if ($matchedService) {
+                $enquiryData['service_id'] = $matchedService->id;
+            }
+        }
+
+        if (isset($mapping['priority_answer'])) {
+            $pAnswer = $data[$mapping['priority_answer']] ?? '';
+            if ($description) $description .= "\n";
+            $description .= "Timeline: " . $pAnswer;
+        }
+        
+        $enquiryData['description'] = trim($description);
+
+        Enquiry::create($enquiryData);
+        $importedCount++;
     }
 
     private function cleanPhone($phone)

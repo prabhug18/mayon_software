@@ -47,13 +47,13 @@
                     <div id="step-1-content" class="step-content">
                         <div class="text-center mb-4">
                             <h5 class="fw-bold">Step 1: Choose your Facebook leads export file</h5>
-                            <p class="text-muted">Upload the .csv or .txt file exported from Facebook Ads Manager</p>
+                            <p class="text-muted">Upload the .csv, .txt, .xls or .xlsx file exported from Facebook Ads Manager</p>
                         </div>
                         <div class="upload-area rounded-4 p-5 text-center border-2 border-dashed border-primary bg-light mb-4" id="drop-zone">
                             <i class="bi bi-cloud-arrow-up display-1 text-primary mb-3"></i>
                             <h4>Drag & Drop File Here</h4>
                             <p class="text-muted">or click to browse from your computer</p>
-                            <input type="file" id="csv_file" class="d-none" accept=".csv,.txt">
+                            <input type="file" id="csv_file" class="d-none" accept=".csv,.txt,.xls,.xlsx">
                             <button class="btn btn-primary px-5 py-2 rounded-pill mt-3" onclick="document.getElementById('csv_file').click()">
                                 <i class="bi bi-folder-fill me-2"></i> Browse File
                             </button>
