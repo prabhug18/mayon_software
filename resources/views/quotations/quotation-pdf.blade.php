@@ -498,6 +498,19 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         </table>
     </div>
 
+    @if($quotation->eligibility_content || $quotation->eligibility)
+    <div class="terms-section">
+        <div class="section-heading">Eligibility</div>
+        <div class="terms-body">
+            @if($quotation->eligibility_content)
+                {!! $quotation->eligibility_content !!}
+            @else
+                {!! $quotation->eligibility->content !!}
+            @endif
+        </div>
+    </div>
+    @endif
+
     {{-- ═══════════════════════════════════════ --}}
     {{-- TERMS & CONDITIONS                     --}}
     {{-- ═══════════════════════════════════════ --}}

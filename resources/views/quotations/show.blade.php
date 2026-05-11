@@ -127,8 +127,8 @@
                         <tr>
                             <td>{{ $index + 1 }}</td>
                             <td>
-                                <div class="fw-bold">{{ $item->service->name }}</div>
-                                <div class="small text-muted">{{ $item->serviceItem->item_name }}</div>
+                                <div class="fw-bold">{{ optional($item->service)->name ?? $item->manual_service_name ?? '-' }}</div>
+                                <div class="small text-muted">{{ optional($item->serviceItem)->item_name ?? $item->manual_item_name ?? '-' }}</div>
                             </td>
                             <td>{{ $item->description ?: '-' }}</td>
                             <td>{{ $item->unit }}</td>
@@ -165,8 +165,24 @@
             </div>
         </div>
 
-        @if($quotation->terms_content || $quotation->termsCondition)
+        @if($quotation->eligibility_content || $quotation->eligibility)
         <div class="section-style mt-5">
+            <div class="section-title">
+                <i class="bi bi-check-square me-2"></i> Eligibility
+            </div>
+            <div class="mt-3 p-4 bg-light rounded-3">
+                @if($quotation->eligibility_content)
+                    {!! $quotation->eligibility_content !!}
+                @else
+                    <div class="fw-bold mb-2 text-primary">{{ $quotation->eligibility->title }}</div>
+                    {!! $quotation->eligibility->content !!}
+                @endif
+            </div>
+        </div>
+        @endif
+
+        @if($quotation->terms_content || $quotation->termsCondition)
+        <div class="section-style mt-4">
             <div class="section-title">
                 <i class="bi bi-shield-check me-2"></i> Terms & Conditions
             </div>

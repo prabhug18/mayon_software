@@ -128,6 +128,7 @@ window.Quotation = (function () {
 
         // Summernote Initialization for Terms Content
         initEditor('#terms_content');
+        initEditor('#eligibility_content');
 
         // Terms Selection Change
         const termsSelect = document.getElementById('terms_condition_id');
@@ -148,6 +149,28 @@ window.Quotation = (function () {
                         }
                     })
                     .catch(e => console.error('Failed to fetch terms', e));
+            });
+        }
+
+        // Eligibility Selection Change
+        const eligibilitySelect = document.getElementById('eligibility_id');
+        if (eligibilitySelect) {
+            eligibilitySelect.addEventListener('change', function () {
+                const id = this.value;
+                if (!id) {
+                    $('#eligibility_content').summernote('code', '');
+                    return;
+                }
+                fetch(`/eligibilities/${id}`, {
+                    headers: { 'Accept': 'application/json' }
+                })
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.data && d.data.content) {
+                            $('#eligibility_content').summernote('code', d.data.content);
+                        }
+                    })
+                    .catch(e => console.error('Failed to fetch eligibility', e));
             });
         }
 
@@ -181,6 +204,21 @@ window.Quotation = (function () {
                     termsContent = ta ? ta.value : '';
                 }
 
+                let eligibilityContent = '';
+                try {
+                    const editorEl = $('#eligibility_content');
+                    if (editorEl.length && editorEl.data('summernote')) {
+                        eligibilityContent = editorEl.summernote('code');
+                    } else {
+                        const tb = document.getElementById('eligibility_content');
+                        eligibilityContent = tb ? tb.value : '';
+                    }
+                } catch (se) {
+                    console.warn('Summernote sync failed', se);
+                    const tb = document.getElementById('eligibility_content');
+                    eligibilityContent = tb ? tb.value : '';
+                }
+
                 const fd = new FormData(form);
                 const data = {};
                 fd.forEach((value, key) => {
@@ -194,7 +232,7 @@ window.Quotation = (function () {
                             if (!data[arrayName][index]) data[arrayName][index] = {};
                             data[arrayName][index][fieldName] = value;
                         }
-                    } else if (key === 'terms_content' || key === '_token') {
+                    } else if (key === 'terms_content' || key === 'eligibility_content' || key === '_token') {
                         // handled separately
                     } else {
                         data[key] = value;
@@ -207,6 +245,7 @@ window.Quotation = (function () {
                 }
 
                 data.terms_content = termsContent;
+                data.eligibility_content = eligibilityContent;
 
                 console.log('Submitting Quotation Data:', data);
 
@@ -299,6 +338,7 @@ window.Quotation = (function () {
 
         // Summernote Initialization for Terms Content
         initEditor('#terms_content');
+        initEditor('#eligibility_content');
 
         // Terms Selection Change
         const termsSelect = document.getElementById('terms_condition_id');
@@ -319,6 +359,28 @@ window.Quotation = (function () {
                         }
                     })
                     .catch(e => console.error('Failed to fetch terms', e));
+            });
+        }
+
+        // Eligibility Selection Change
+        const eligibilitySelect = document.getElementById('eligibility_id');
+        if (eligibilitySelect) {
+            eligibilitySelect.addEventListener('change', function () {
+                const id = this.value;
+                if (!id) {
+                    $('#eligibility_content').summernote('code', '');
+                    return;
+                }
+                fetch(`/eligibilities/${id}`, {
+                    headers: { 'Accept': 'application/json' }
+                })
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.data && d.data.content) {
+                            $('#eligibility_content').summernote('code', d.data.content);
+                        }
+                    })
+                    .catch(e => console.error('Failed to fetch eligibility', e));
             });
         }
 
@@ -352,6 +414,21 @@ window.Quotation = (function () {
                     termsContent = ta ? ta.value : '';
                 }
 
+                let eligibilityContent = '';
+                try {
+                    const editorEl = $('#eligibility_content');
+                    if (editorEl.length && editorEl.data('summernote')) {
+                        eligibilityContent = editorEl.summernote('code');
+                    } else {
+                        const tb = document.getElementById('eligibility_content');
+                        eligibilityContent = tb ? tb.value : '';
+                    }
+                } catch (se) {
+                    console.warn('Summernote sync failed', se);
+                    const tb = document.getElementById('eligibility_content');
+                    eligibilityContent = tb ? tb.value : '';
+                }
+
                 const fd = new FormData(form);
                 const data = {};
                 fd.forEach((value, key) => {
@@ -365,7 +442,7 @@ window.Quotation = (function () {
                             if (!data[arrayName][index]) data[arrayName][index] = {};
                             data[arrayName][index][fieldName] = value;
                         }
-                    } else if (key === 'terms_content' || key === '_token') {
+                    } else if (key === 'terms_content' || key === 'eligibility_content' || key === '_token') {
                         // handled separately
                     } else {
                         data[key] = value;
@@ -378,6 +455,7 @@ window.Quotation = (function () {
                 }
 
                 data.terms_content = termsContent;
+                data.eligibility_content = eligibilityContent;
 
                 const token = typeof window.getCsrfToken === 'function' ? window.getCsrfToken() : '';
 
@@ -709,6 +787,11 @@ window.Quotation = (function () {
                         ['table', ['table']],
                         ['insert', ['link']],
                         ['view', ['fullscreen', 'codeview', 'help']]
+                    ],
+                    styleTags: [
+                        'p',
+                        { title: 'No Spacing', tag: 'div', className: '', value: 'div' },
+                        'h4', 'h5', 'h6'
                     ],
                     callbacks: {
                         onInit: function () {

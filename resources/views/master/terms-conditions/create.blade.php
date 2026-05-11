@@ -119,7 +119,11 @@ $(document).ready(function(){
                 ['insert', ['link']],
                 ['view', ['codeview', 'help']]
             ],
-            styleTags: ['p', 'h4', 'h5', 'h6'],
+            styleTags: [
+                'p',
+                { title: 'No Spacing', tag: 'div', className: '', value: 'div' },
+                'h4', 'h5', 'h6'
+            ],
             callbacks: {
                 onChange: function(contents) {
                     $editor.removeClass('is-invalid');

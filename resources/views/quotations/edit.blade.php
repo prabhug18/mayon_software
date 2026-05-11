@@ -244,6 +244,18 @@
                         <div class="invalid-feedback" id="terms_condition_id-error"></div>
                     </div>
                     <div class="col-md-6 mb-3">
+                        <label class="form-label">Eligibility</label>
+                        <select class="form-select custom-input" id="eligibility_id" name="eligibility_id">
+                            <option value="">Select Eligibility</option>
+                            @foreach($eligibilities as $el)
+                                <option value="{{ $el->id }}" {{ $quotation->eligibility_id == $el->id ? 'selected' : '' }}>
+                                    {{ $el->title }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="invalid-feedback" id="eligibility_id-error"></div>
+                    </div>
+                    <div class="col-md-6 mb-3">
                         <label class="form-label">Status</label>
                         <select class="form-select custom-input" id="status" name="status">
                             <option value="DRAFT" {{ $quotation->status == 'DRAFT' ? 'selected' : '' }}>Draft</option>
@@ -259,6 +271,14 @@
                         <textarea id="terms_content" name="terms_content" class="form-control">{{ $quotation->terms_content }}</textarea>
                         <div class="invalid-feedback" id="terms_content-error"></div>
                         <small class="text-muted">Select a template above to load its content, then customize it for this quotation.</small>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <label class="form-label">Editable Eligibility Content</label>
+                        <textarea id="eligibility_content" name="eligibility_content" class="form-control">{{ $quotation->eligibility_content }}</textarea>
+                        <div class="invalid-feedback" id="eligibility_content-error"></div>
+                        <small class="text-muted">Select an eligibility template above to load its content, then customize it for this quotation.</small>
                     </div>
                 </div>
             </div>

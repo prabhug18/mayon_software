@@ -19,6 +19,8 @@ class Quotation extends Model
         'quotation_type',
         'terms_condition_id',
         'terms_content',
+        'eligibility_id',
+        'eligibility_content',
         'subtotal',
         'gst_total',
         'grand_total',
@@ -53,6 +55,11 @@ class Quotation extends Model
     public function termsCondition()
     {
         return $this->belongsTo(TermsCondition::class);
+    }
+
+    public function eligibility()
+    {
+        return $this->belongsTo(Eligibility::class);
     }
 
     public function items()
