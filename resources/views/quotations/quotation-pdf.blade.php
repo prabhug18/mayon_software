@@ -459,10 +459,14 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
                 <td class="sno-col">{{ $index + 1 }}</td>
                 <td class="desc-col">
                     @php
-                        $itemName = $item->serviceItem?->item_name ?? $item->manual_item_name;
+                        $svcName = optional($item->service)->name ?? $item->manual_service_name;
+                        $itemName = optional($item->serviceItem)->item_name ?? $item->manual_item_name;
                     @endphp
+                    @if($svcName)
+                        <div class="item-svc-name">{{ $svcName }}</div>
+                    @endif
                     @if($itemName)
-                        <div class="item-svc-name" style="font-size: 9.5px; margin-bottom: 4px;">{{ $itemName }}</div>
+                        <div class="item-sub-name">{{ $itemName }}</div>
                     @endif
                     @if($item->description)
                         <div class="item-desc-text" style="font-size: 8.5px; margin-top: 2px;">{!! nl2br(e($item->description)) !!}</div>
@@ -490,6 +494,13 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             <tr>
                 <td class="tot-label">GST</td>
                 <td class="tot-val">&#x20B9; {{ $fmt($quotation->gst_total) }}</td>
+            </tr>
+            @php
+                $roundOff = $quotation->grand_total - ($quotation->subtotal + $quotation->gst_total);
+            @endphp
+            <tr>
+                <td class="tot-label">Round Off</td>
+                <td class="tot-val">&#x20B9; {{ $fmt($roundOff) }}</td>
             </tr>
             <tr>
                 <td class="grand-label">Grand Total</td>

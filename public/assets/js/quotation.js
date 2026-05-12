@@ -42,10 +42,22 @@ window.Quotation = (function () {
             return;
         }
 
-        // Company change -> fetch quotation number
+        // Initialize Select2 for Enquiry
+        $('#enquiry_id').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Select Enquiry',
+            allowClear: true
+        });
+
+        // Initialize Select2 for Company
+        $('#company_id').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Select Company'
+        });
+
         const companySelect = document.getElementById('company_id');
         if (companySelect) {
-            companySelect.addEventListener('change', function () {
+            $(companySelect).on('change', function () {
                 const companyId = this.value;
                 if (!companyId) return;
                 fetch(`/quotations/next-number?company_id=${companyId}`, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
@@ -62,7 +74,7 @@ window.Quotation = (function () {
         // Enquiry change -> fetch enquiry details and populate items
         const enquirySelect = document.getElementById('enquiry_id');
         if (enquirySelect) {
-            enquirySelect.addEventListener('change', function () {
+            $(enquirySelect).on('change', function () {
                 const enquiryId = this.value;
                 if (!enquiryId) {
                     if (document.getElementById('customer_name')) document.getElementById('customer_name').value = '';
@@ -112,6 +124,10 @@ window.Quotation = (function () {
                     })
                     .catch(() => console.error('Failed to fetch enquiry details'));
             });
+
+            if (enquirySelect.value) {
+                $(enquirySelect).trigger('change');
+            }
         }
 
         // Add first item on load
@@ -320,6 +336,19 @@ window.Quotation = (function () {
             console.warn('Quotation ID missing on form dataset');
             return;
         }
+
+        // Initialize Select2 for Enquiry
+        $('#enquiry_id').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Select Enquiry',
+            allowClear: true
+        });
+
+        // Initialize Select2 for Company
+        $('#company_id').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Select Company'
+        });
 
         // Initialize existing items
         itemIndex = document.querySelectorAll('.item-row').length;
@@ -577,7 +606,7 @@ window.Quotation = (function () {
                     itemSelect.classList.add('d-none');
                     itemSelect.removeAttribute('required');
                     manualItemInput.classList.remove('d-none');
-                    manualItemInput.setAttribute('required', 'required');
+                    // manualItemInput.setAttribute('required', 'required'); // Made optional as per request
                 } else {
                     serviceSelect.classList.remove('d-none');
                     serviceSelect.setAttribute('required', 'required');
@@ -726,14 +755,18 @@ window.Quotation = (function () {
             gstTotal += itemGst;
         });
 
-        const grandTotal = subtotal + gstTotal;
+        const totalBeforeRounding = subtotal + gstTotal;
+        const grandTotal = Math.round(totalBeforeRounding);
+        const roundOff = grandTotal - totalBeforeRounding;
 
         const subtotalDisplay = document.getElementById('subtotal-display');
         const gstTotalDisplay = document.getElementById('gst-total-display');
+        const roundOffDisplay = document.getElementById('round-off-display');
         const grandTotalDisplay = document.getElementById('grand-total-display');
 
         if (subtotalDisplay) subtotalDisplay.textContent = '₹ ' + subtotal.toFixed(2);
         if (gstTotalDisplay) gstTotalDisplay.textContent = '₹ ' + gstTotal.toFixed(2);
+        if (roundOffDisplay) roundOffDisplay.textContent = '₹ ' + roundOff.toFixed(2);
         if (grandTotalDisplay) grandTotalDisplay.textContent = '₹ ' + grandTotal.toFixed(2);
     }
 

@@ -454,50 +454,43 @@ class QuotationController extends Controller
         ]);
 
         $filename = ($quotation->quotation_no ?: 'quotation-') . '.pdf';
+        $filename = str_replace(['/', '\\'], '_', $filename);
         return $pdf->download($filename);
     }
 
-    /**
-     * Generate quotation number using company prefix + FY + sequence
-     */
     private function generateQuotationNumber($companyId)
     {
         $company = Company::find($companyId);
         $prefix = ($company && $company->quotation_prefix) ? $company->quotation_prefix : 'QT-';
+        $startNumber = ($company && $company->quotation_start_number) ? $company->quotation_start_number : 1;
 
-        // Determine financial year code
-        $now = now();
-        $yearStart = $now->month >= 4 ? $now->year : $now->year - 1;
-        $fySuffix = substr((string)$yearStart, 2, 2) . substr((string)($yearStart + 1), 2, 2);
-
-        // Find last quotation for this company in this FY
-        $like = $prefix . $fySuffix . '%';
+        // Find last quotation for this company starting with this prefix
         $last = Quotation::where('company_id', $companyId)
-            ->where('quotation_no', 'like', $like)
+            ->where('quotation_no', 'like', $prefix . '%')
             ->orderBy('id', 'desc')
             ->first();
 
-        $nextSeq = 1;
+        $nextSeq = $startNumber;
+
         if ($last) {
-            $base = $prefix . $fySuffix;
-            if (strpos($last->quotation_no, $base) === 0) {
-                $suffixPart = substr($last->quotation_no, strlen($base));
-                if (preg_match('/^0*(\d+)$/', $suffixPart, $mm)) {
-                    $nextSeq = intval($mm[1]) + 1;
-                }
+            // Extract the numeric part after the prefix
+            $suffixPart = substr($last->quotation_no, strlen($prefix));
+            if (preg_match('/^(\d+)$/', $suffixPart, $matches)) {
+                $lastNumber = intval($matches[1]);
+                $nextSeq = max($startNumber, $lastNumber + 1);
             }
         }
 
+        // Format with leading zeros (optional, but let's keep it consistent if it's a simple number)
+        // If the start number is large (e.g. 1001), padding to 2 digits won't change it.
         $seqStr = str_pad($nextSeq, 2, '0', STR_PAD_LEFT);
-        $generated = $prefix . $fySuffix . $seqStr;
+        $generated = $prefix . $seqStr;
 
         // Ensure uniqueness
-        $tries = 0;
-        while (Quotation::where('quotation_no', $generated)->exists() && $tries < 5) {
-            $tries++;
+        while (Quotation::where('quotation_no', $generated)->exists()) {
             $nextSeq++;
             $seqStr = str_pad($nextSeq, 2, '0', STR_PAD_LEFT);
-            $generated = $prefix . $fySuffix . $seqStr;
+            $generated = $prefix . $seqStr;
         }
 
         return $generated;

@@ -127,7 +127,10 @@ $groupedItems = $quotation->items->groupBy('service_id');
                     @foreach($items as $index => $item)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item->serviceItem->item_name }}</td>
+                        <td>
+                            <div style="font-weight:bold; color:#2563EB;">{{ optional($item->service)->name ?? $item->manual_service_name ?? '-' }}</div>
+                            <div style="font-size:11px; color:#666; margin-top:2px;">{{ optional($item->serviceItem)->item_name ?? $item->manual_item_name ?? '-' }}</div>
+                        </td>
                         <td style="font-size:11px;color:#666">{{ $item->description ?: '-' }}</td>
                         <td>{{ $item->unit }}</td>
                         <td>{{ $fmt($item->quantity) }}</td>
@@ -155,6 +158,13 @@ $groupedItems = $quotation->items->groupBy('service_id');
                         <tr>
                             <td style="padding:4px 0;font-size:12px">GST Total:</td>
                             <td style="padding:4px 0;text-align:right;font-size:12px">₹ {{ $fmt($quotation->gst_total) }}</td>
+                        </tr>
+                        @php
+                            $roundOff = $quotation->grand_total - ($quotation->subtotal + $quotation->gst_total);
+                        @endphp
+                        <tr>
+                            <td style="padding:4px 0;font-size:12px">Round Off:</td>
+                            <td style="padding:4px 0;text-align:right;font-size:12px">₹ {{ $fmt($roundOff) }}</td>
                         </tr>
                         <tr style="border-top:1px solid rgba(255,255,255,0.3)">
                             <td style="padding:8px 0 4px 0;font-size:14px;font-weight:700">Grand Total:</td>

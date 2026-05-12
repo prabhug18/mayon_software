@@ -215,6 +215,10 @@
                                     <span class="text-muted">GST Total:</span>
                                     <span id="gst-total-display" class="fw-bold">₹ {{ number_format($quotation->gst_total, 2) }}</span>
                                 </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Round Off:</span>
+                                    <span id="round-off-display" class="fw-bold">₹ 0.00</span>
+                                </div>
                                 <hr>
                                 <div class="d-flex justify-content-between">
                                     <span class="h6 mb-0 fw-bold">Grand Total:</span>

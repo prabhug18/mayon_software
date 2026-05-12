@@ -155,6 +155,13 @@
                             <span class="text-muted">GST Total:</span>
                             <span class="fw-bold">₹ {{ number_format($quotation->gst_total, 2) }}</span>
                         </div>
+                        @php
+                            $roundOff = $quotation->grand_total - ($quotation->subtotal + $quotation->gst_total);
+                        @endphp
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Round Off:</span>
+                            <span class="fw-bold">₹ {{ number_format($roundOff, 2) }}</span>
+                        </div>
                         <hr>
                         <div class="d-flex justify-content-between h5 mb-0">
                             <span class="fw-bold">Grand Total:</span>

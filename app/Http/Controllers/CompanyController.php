@@ -34,6 +34,9 @@ class CompanyController extends Controller
             'name' => 'required|string|max:255|unique:companies,name',
             'contact_person' => 'nullable|string|max:255',
             'po_prefix' => 'nullable|string|max:50',
+            'po_start_number' => 'nullable|integer|min:1',
+            'quotation_prefix' => 'nullable|string|max:50',
+            'quotation_start_number' => 'nullable|integer|min:1',
             'mobile' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string|max:500',
@@ -44,7 +47,7 @@ class CompanyController extends Controller
 
         if ($validator->fails()) return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
 
-    $data = $request->only(['name','po_prefix','contact_person','mobile','email','address','gst_no']);
+    $data = $request->only(['name','po_prefix','po_start_number','quotation_prefix','quotation_start_number','contact_person','mobile','email','address','gst_no']);
         if ($request->hasFile('logo')) {
             $file = $request->file('logo');
             $filename = time() . '_' . preg_replace('/[^A-Za-z0-9_\.-]/', '_', $file->getClientOriginalName());
@@ -78,6 +81,9 @@ class CompanyController extends Controller
             'name' => 'required|string|max:255|unique:companies,name,'.$company->id,
             'contact_person' => 'nullable|string|max:255',
             'po_prefix' => 'nullable|string|max:50',
+            'po_start_number' => 'nullable|integer|min:1',
+            'quotation_prefix' => 'nullable|string|max:50',
+            'quotation_start_number' => 'nullable|integer|min:1',
             'mobile' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string|max:500',
@@ -87,7 +93,7 @@ class CompanyController extends Controller
         ]);
         if ($validator->fails()) return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
 
-    $data = $request->only(['name','po_prefix','contact_person','mobile','email','address','gst_no']);
+    $data = $request->only(['name','po_prefix','po_start_number','quotation_prefix','quotation_start_number','contact_person','mobile','email','address','gst_no']);
         if ($request->hasFile('logo')) {
             if ($company->logo && File::exists(public_path($company->logo))) { try { File::delete(public_path($company->logo)); } catch (\Exception $e) { } }
             $file = $request->file('logo');

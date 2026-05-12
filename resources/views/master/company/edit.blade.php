@@ -20,9 +20,24 @@
                         <div class="invalid-feedback" id="contact_person-error"></div>
                     </div>
                     <div class="col-md-6 mb-3">
+                        <label class="form-label">Quotation Prefix <span class="text-muted small">(optional)</span></label>
+                        <input type="text" class="form-control custom-input" id="quotation_prefix" name="quotation_prefix" value="{{ $company->quotation_prefix }}" placeholder="E.g. QT/2627/" />
+                        <div class="invalid-feedback" id="quotation_prefix-error"></div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Quotation Start Number <span class="text-muted small">(optional)</span></label>
+                        <input type="number" class="form-control custom-input" id="quotation_start_number" name="quotation_start_number" value="{{ $company->quotation_start_number ?? 1 }}" min="1" />
+                        <div class="invalid-feedback" id="quotation_start_number-error"></div>
+                    </div>
+                    <div class="col-md-6 mb-3">
                         <label class="form-label">PO Prefix <span class="text-muted small">(optional)</span></label>
-                        <input type="text" class="form-control custom-input" id="po_prefix" name="po_prefix" value="{{ $company->po_prefix }}" placeholder="E.g. PO-ABC-" />
+                        <input type="text" class="form-control custom-input" id="po_prefix" name="po_prefix" value="{{ $company->po_prefix }}" placeholder="E.g. PO/2627/" />
                         <div class="invalid-feedback" id="po_prefix-error"></div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">PO Start Number <span class="text-muted small">(optional)</span></label>
+                        <input type="number" class="form-control custom-input" id="po_start_number" name="po_start_number" value="{{ $company->po_start_number ?? 1 }}" min="1" />
+                        <div class="invalid-feedback" id="po_start_number-error"></div>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Mobile Number</label>

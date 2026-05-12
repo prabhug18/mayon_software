@@ -70,7 +70,7 @@ class QuotationCalculator
         return [
             'subtotal' => round($subtotal, 2),
             'gst_total' => round($gstTotal, 2),
-            'grand_total' => round($subtotal + $gstTotal, 2)
+            'grand_total' => round($subtotal + $gstTotal)
         ];
     }
 
