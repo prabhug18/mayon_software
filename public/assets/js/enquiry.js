@@ -2,7 +2,17 @@ window.Enquiry = (function () {
     let deleteTargetId = null;
     function initList(selector) {
         const table = $(selector).DataTable({
-            ajax: { url: '/enquiries', dataSrc: 'data' },
+            ajax: { 
+                url: '/enquiries', 
+                data: function(d) {
+                    d.period = $('#date_filter').val();
+                    d.year = $('#year_filter').val();
+                    d.from = $('#from_date').val();
+                    d.to = $('#to_date').val();
+                },
+                dataSrc: 'data' 
+            },
+            order: [],
             columns: [
                 {
                     data: null,
@@ -13,7 +23,16 @@ window.Enquiry = (function () {
                 {
                     data: null,
                     render: function (row) {
-                        return `<strong>${row.name}</strong><br><small class="text-muted">${row.mobile || ''}</small>`;
+                        let monthBadge = '';
+                        const dateStr = row.fb_created_at || row.created_at;
+                        if (dateStr) {
+                            try {
+                                const d = new Date(dateStr);
+                                const month = d.toLocaleString('default', { month: 'short' }).toUpperCase();
+                                monthBadge = `<span class="badge bg-light text-primary border border-primary me-2" style="font-size: 0.65rem; padding: 0.2em 0.4em;">${month}</span>`;
+                            } catch (e) {}
+                        }
+                        return `${monthBadge}<strong>${row.name}</strong><br><small class="text-muted">${row.mobile || ''}</small>`;
                     }
                 },
                 {
@@ -85,6 +104,20 @@ window.Enquiry = (function () {
             ]
         });
         window.EnquiryTable = table;
+
+        // Filter event listeners
+        $('#date_filter').on('change', function() {
+            if ($(this).val() === 'custom') {
+                $('.custom-date-container').removeClass('d-none');
+            } else {
+                $('.custom-date-container').addClass('d-none');
+                table.ajax.reload();
+            }
+        });
+
+        $('#year_filter, #from_date, #to_date').on('change', function() {
+            table.ajax.reload();
+        });
     }
 
     function initForm(selector) {

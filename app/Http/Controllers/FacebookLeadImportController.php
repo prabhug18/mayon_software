@@ -175,8 +175,11 @@ class FacebookLeadImportController extends Controller
                 // Backfill missing fields on the existing record
                 $updates = [];
 
-                if (empty($existing->fb_created_at) && isset($mapping['fb_created_at']) && !empty($data[$mapping['fb_created_at']])) {
-                    $updates['fb_created_at'] = \Carbon\Carbon::parse($data[$mapping['fb_created_at']]);
+                if (isset($mapping['fb_created_at']) && !empty($data[$mapping['fb_created_at']])) {
+                    $parsedDate = $this->parseImportDate($data[$mapping['fb_created_at']]);
+                    if ($parsedDate) {
+                        $updates['fb_created_at'] = $parsedDate;
+                    }
                 }
                 if (empty($existing->fb_timeline) && isset($mapping['priority_answer']) && !empty($data[$mapping['priority_answer']])) {
                     $updates['fb_timeline'] = $data[$mapping['priority_answer']];
@@ -209,7 +212,7 @@ class FacebookLeadImportController extends Controller
             'fb_form_name' => $data[$mapping['fb_form_name']] ?? null,
             'fb_platform' => $data[$mapping['fb_platform']] ?? null,
             'fb_timeline' => $data[$mapping['priority_answer']] ?? null,
-            'fb_created_at' => isset($mapping['fb_created_at']) && !empty($data[$mapping['fb_created_at']]) ? \Carbon\Carbon::parse($data[$mapping['fb_created_at']]) : null,
+            'fb_created_at' => $this->parseImportDate($data[$mapping['fb_created_at']] ?? null),
             'name' => $data[$mapping['name']] ?? 'Unknown',
             'email' => $data[$mapping['email']] ?? null,
             'mobile' => $this->cleanPhone($data[$mapping['mobile']] ?? null),
@@ -261,5 +264,28 @@ class FacebookLeadImportController extends Controller
         $phone = str_replace(['p:', '+91'], '', $phone);
         // Remove non-numeric characters
         return preg_replace('/[^0-9]/', '', $phone);
+    }
+
+    private function parseImportDate($value)
+    {
+        if (empty($value)) return null;
+
+        // If it looks like a number, it might be an Excel date serial or Unix timestamp
+        if (is_numeric($value)) {
+            if ($value > 100000000) {
+                // Unix timestamp (seconds since 1970)
+                try { return \Carbon\Carbon::createFromTimestamp($value); } catch (\Exception $e) {}
+            } elseif ($value > 20000 && $value < 100000) {
+                // Excel date float (days since 1900)
+                try { return \Carbon\Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value)); } catch (\Exception $e) {}
+            }
+        }
+
+        // Try standard parsing for strings like "2024-05-13T12:00:00+0000" or "13/05/2024"
+        try {
+            return \Carbon\Carbon::parse($value);
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }
