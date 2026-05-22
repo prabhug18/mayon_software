@@ -74,7 +74,7 @@
               <li><a href="{{ route('services.index') }}"><i class="fas fa-concierge-bell"></i><span> Services</span></a></li>
               <li><a href="{{ route('service-items.index') }}"><i class="fas fa-list-ul"></i><span> Service Items</span></a></li>
               <li><a href="{{ route('terms-conditions.index') }}"><i class="fas fa-file-contract"></i><span> Terms & Conditions</span></a></li>
-              <li><a href="{{ route('eligibilities.index') }}"><i class="fas fa-check-square"></i><span> Eligibility</span></a></li>
+              <li><a href="{{ route('methodologies.index') }}"><i class="fas fa-check-square"></i><span> Methodology</span></a></li>
               <li><a href="{{ route('vendors.index') }}"><i class="fas fa-handshake"></i><span> Vendors</span></a></li>
               <li><a href="{{ route('units.index') }}"><i class="fas fa-database"></i><span> Unit</span></a></li>
               <li><a href="{{ route('sources.index') }}"><i class="fas fa-database"></i><span> Source</span></a></li>

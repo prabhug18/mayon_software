@@ -19,8 +19,8 @@ class Quotation extends Model
         'quotation_type',
         'terms_condition_id',
         'terms_content',
-        'eligibility_id',
-        'eligibility_content',
+        'methodology_id',
+        'methodology_content',
         'subtotal',
         'gst_total',
         'grand_total',
@@ -30,6 +30,7 @@ class Quotation extends Model
         'customer_name',
         'customer_address',
         'kind_att',
+        'subject',
         'created_by'
     ];
 
@@ -57,9 +58,9 @@ class Quotation extends Model
         return $this->belongsTo(TermsCondition::class);
     }
 
-    public function eligibility()
+    public function methodology()
     {
-        return $this->belongsTo(Eligibility::class);
+        return $this->belongsTo(Methodology::class);
     }
 
     public function items()

@@ -144,7 +144,7 @@ window.Quotation = (function () {
 
         // Summernote Initialization for Terms Content
         initEditor('#terms_content');
-        initEditor('#eligibility_content');
+        initEditor('#methodology_content');
 
         // Terms Selection Change
         const termsSelect = document.getElementById('terms_condition_id');
@@ -168,25 +168,25 @@ window.Quotation = (function () {
             });
         }
 
-        // Eligibility Selection Change
-        const eligibilitySelect = document.getElementById('eligibility_id');
-        if (eligibilitySelect) {
-            eligibilitySelect.addEventListener('change', function () {
+        // Methodology Selection Change
+        const methodologySelect = document.getElementById('methodology_id');
+        if (methodologySelect) {
+            methodologySelect.addEventListener('change', function () {
                 const id = this.value;
                 if (!id) {
-                    $('#eligibility_content').summernote('code', '');
+                    $('#methodology_content').summernote('code', '');
                     return;
                 }
-                fetch(`/eligibilities/${id}`, {
+                fetch(`/methodologies/${id}`, {
                     headers: { 'Accept': 'application/json' }
                 })
                     .then(r => r.json())
                     .then(d => {
                         if (d.data && d.data.content) {
-                            $('#eligibility_content').summernote('code', d.data.content);
+                            $('#methodology_content').summernote('code', d.data.content);
                         }
                     })
-                    .catch(e => console.error('Failed to fetch eligibility', e));
+                    .catch(e => console.error('Failed to fetch methodology', e));
             });
         }
 
@@ -220,19 +220,19 @@ window.Quotation = (function () {
                     termsContent = ta ? ta.value : '';
                 }
 
-                let eligibilityContent = '';
+                let methodologyContent = '';
                 try {
-                    const editorEl = $('#eligibility_content');
+                    const editorEl = $('#methodology_content');
                     if (editorEl.length && editorEl.data('summernote')) {
-                        eligibilityContent = editorEl.summernote('code');
+                        methodologyContent = editorEl.summernote('code');
                     } else {
-                        const tb = document.getElementById('eligibility_content');
-                        eligibilityContent = tb ? tb.value : '';
+                        const tb = document.getElementById('methodology_content');
+                        methodologyContent = tb ? tb.value : '';
                     }
                 } catch (se) {
                     console.warn('Summernote sync failed', se);
-                    const tb = document.getElementById('eligibility_content');
-                    eligibilityContent = tb ? tb.value : '';
+                    const tb = document.getElementById('methodology_content');
+                    methodologyContent = tb ? tb.value : '';
                 }
 
                 const fd = new FormData(form);
@@ -248,7 +248,7 @@ window.Quotation = (function () {
                             if (!data[arrayName][index]) data[arrayName][index] = {};
                             data[arrayName][index][fieldName] = value;
                         }
-                    } else if (key === 'terms_content' || key === 'eligibility_content' || key === '_token') {
+                    } else if (key === 'terms_content' || key === 'methodology_content' || key === '_token') {
                         // handled separately
                     } else {
                         data[key] = value;
@@ -261,7 +261,7 @@ window.Quotation = (function () {
                 }
 
                 data.terms_content = termsContent;
-                data.eligibility_content = eligibilityContent;
+                data.methodology_content = methodologyContent;
 
                 console.log('Submitting Quotation Data:', data);
 
@@ -367,7 +367,7 @@ window.Quotation = (function () {
 
         // Summernote Initialization for Terms Content
         initEditor('#terms_content');
-        initEditor('#eligibility_content');
+        initEditor('#methodology_content');
 
         // Terms Selection Change
         const termsSelect = document.getElementById('terms_condition_id');
@@ -391,25 +391,25 @@ window.Quotation = (function () {
             });
         }
 
-        // Eligibility Selection Change
-        const eligibilitySelect = document.getElementById('eligibility_id');
-        if (eligibilitySelect) {
-            eligibilitySelect.addEventListener('change', function () {
+        // Methodology Selection Change
+        const methodologySelect = document.getElementById('methodology_id');
+        if (methodologySelect) {
+            methodologySelect.addEventListener('change', function () {
                 const id = this.value;
                 if (!id) {
-                    $('#eligibility_content').summernote('code', '');
+                    $('#methodology_content').summernote('code', '');
                     return;
                 }
-                fetch(`/eligibilities/${id}`, {
+                fetch(`/methodologies/${id}`, {
                     headers: { 'Accept': 'application/json' }
                 })
                     .then(r => r.json())
                     .then(d => {
                         if (d.data && d.data.content) {
-                            $('#eligibility_content').summernote('code', d.data.content);
+                            $('#methodology_content').summernote('code', d.data.content);
                         }
                     })
-                    .catch(e => console.error('Failed to fetch eligibility', e));
+                    .catch(e => console.error('Failed to fetch methodology', e));
             });
         }
 
@@ -443,19 +443,19 @@ window.Quotation = (function () {
                     termsContent = ta ? ta.value : '';
                 }
 
-                let eligibilityContent = '';
+                let methodologyContent = '';
                 try {
-                    const editorEl = $('#eligibility_content');
+                    const editorEl = $('#methodology_content');
                     if (editorEl.length && editorEl.data('summernote')) {
-                        eligibilityContent = editorEl.summernote('code');
+                        methodologyContent = editorEl.summernote('code');
                     } else {
-                        const tb = document.getElementById('eligibility_content');
-                        eligibilityContent = tb ? tb.value : '';
+                        const tb = document.getElementById('methodology_content');
+                        methodologyContent = tb ? tb.value : '';
                     }
                 } catch (se) {
                     console.warn('Summernote sync failed', se);
-                    const tb = document.getElementById('eligibility_content');
-                    eligibilityContent = tb ? tb.value : '';
+                    const tb = document.getElementById('methodology_content');
+                    methodologyContent = tb ? tb.value : '';
                 }
 
                 const fd = new FormData(form);
@@ -471,7 +471,7 @@ window.Quotation = (function () {
                             if (!data[arrayName][index]) data[arrayName][index] = {};
                             data[arrayName][index][fieldName] = value;
                         }
-                    } else if (key === 'terms_content' || key === 'eligibility_content' || key === '_token') {
+                    } else if (key === 'terms_content' || key === 'methodology_content' || key === '_token') {
                         // handled separately
                     } else {
                         data[key] = value;
@@ -484,7 +484,7 @@ window.Quotation = (function () {
                 }
 
                 data.terms_content = termsContent;
-                data.eligibility_content = eligibilityContent;
+                data.methodology_content = methodologyContent;
 
                 const token = typeof window.getCsrfToken === 'function' ? window.getCsrfToken() : '';
 
@@ -596,8 +596,8 @@ window.Quotation = (function () {
         const manualItemInput = mainRow.querySelector('.manual-item-input');
 
         if (manualToggle) {
-            manualToggle.addEventListener('change', function () {
-                if (this.checked) {
+            const syncManualState = () => {
+                if (manualToggle.checked) {
                     serviceSelect.classList.add('d-none');
                     serviceSelect.removeAttribute('required');
                     manualServiceInput.classList.remove('d-none');
@@ -618,7 +618,10 @@ window.Quotation = (function () {
                     manualItemInput.classList.add('d-none');
                     manualItemInput.removeAttribute('required');
                 }
-            });
+            };
+
+            manualToggle.addEventListener('change', syncManualState);
+            syncManualState();
         }
 
         // Service change -> load items

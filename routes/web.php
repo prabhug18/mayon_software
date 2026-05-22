@@ -80,7 +80,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('services', App\Http\Controllers\ServiceController::class);
         Route::resource('service-items', App\Http\Controllers\ServiceItemController::class);
         Route::resource('terms-conditions', App\Http\Controllers\TermsConditionController::class);
-        Route::resource('eligibilities', App\Http\Controllers\EligibilityController::class);
+        Route::resource('methodologies', App\Http\Controllers\MethodologyController::class);
         Route::resource('vendors', App\Http\Controllers\VendorController::class);
     });
 

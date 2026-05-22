@@ -2,29 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Eligibility;
+use App\Models\Methodology;
 use Illuminate\Http\Request;
 use App\Traits\APIResponse;
 use Illuminate\Support\Facades\Validator;
 
-class EligibilityController extends Controller
+class MethodologyController extends Controller
 {
     use APIResponse;
 
     public function index(Request $request)
     {
-        $heading = 'Eligibility';
+        $heading = 'Methodology';
         if ($request->wantsJson()) {
-            $data = Eligibility::orderBy('title')->get();
+            $data = Methodology::orderBy('title')->get();
             return $this->success($data);
         }
-        return view('master.eligibility.index', compact('heading'));
+        return view('master.methodology.index', compact('heading'));
     }
 
     public function create()
     {
-        $heading = 'Add Eligibility';
-        return view('master.eligibility.create', compact('heading'));
+        $heading = 'Add Methodology';
+        return view('master.methodology.create', compact('heading'));
     }
 
     public function store(Request $request)
@@ -40,26 +40,26 @@ class EligibilityController extends Controller
             return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
         }
 
-        $eligibility = Eligibility::create($request->all());
-        return $this->success($eligibility, 'Eligibility created successfully');
+        $methodology = Methodology::create($request->all());
+        return $this->success($methodology, 'Methodology created successfully');
     }
 
     public function show($id)
     {
-        $eligibility = Eligibility::findOrFail($id);
-        return $this->success($eligibility);
+        $methodology = Methodology::findOrFail($id);
+        return $this->success($methodology);
     }
 
     public function edit($id)
     {
-        $heading = 'Edit Eligibility';
-        $eligibility = Eligibility::findOrFail($id);
-        return view('master.eligibility.edit', compact('heading', 'eligibility'));
+        $heading = 'Edit Methodology';
+        $methodology = Methodology::findOrFail($id);
+        return view('master.methodology.edit', compact('heading', 'methodology'));
     }
 
     public function update(Request $request, $id)
     {
-        $eligibility = Eligibility::findOrFail($id);
+        $methodology = Methodology::findOrFail($id);
         
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
@@ -72,14 +72,14 @@ class EligibilityController extends Controller
             return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
         }
 
-        $eligibility->update($request->all());
-        return $this->success($eligibility, 'Eligibility updated successfully');
+        $methodology->update($request->all());
+        return $this->success($methodology, 'Methodology updated successfully');
     }
 
     public function destroy($id)
     {
-        $eligibility = Eligibility::findOrFail($id);
-        $eligibility->delete();
-        return $this->success([], 'Eligibility deleted successfully');
+        $methodology = Methodology::findOrFail($id);
+        $methodology->delete();
+        return $this->success([], 'Methodology deleted successfully');
     }
 }

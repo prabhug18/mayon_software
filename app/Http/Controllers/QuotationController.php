@@ -8,7 +8,7 @@ use App\Models\Company;
 use App\Models\Service;
 use App\Models\ServiceItem;
 use App\Models\TermsCondition;
-use App\Models\Eligibility;
+use App\Models\Methodology;
 use App\Models\Vendor;
 use App\Models\QuotationItem;
 use App\Models\QuotationVendorCost;
@@ -58,7 +58,7 @@ class QuotationController extends Controller
             ->get()
             ->groupBy('category');
         $termsConditions = TermsCondition::where('is_active', true)->orderBy('title')->get();
-        $eligibilities = Eligibility::where('is_active', true)->orderBy('title')->get();
+        $methodologies = Methodology::where('is_active', true)->orderBy('title')->get();
         $vendors = Vendor::where('is_active', true)->orderBy('name')->get();
 
         return view('quotations.create', compact(
@@ -68,7 +68,7 @@ class QuotationController extends Controller
             'enquiries',
             'services',
             'termsConditions',
-            'eligibilities',
+            'methodologies',
             'vendors'
         ));
     }
@@ -84,11 +84,12 @@ class QuotationController extends Controller
             'quotation_type' => 'required|in:OWN,THIRD_PARTY,MIXED',
             'terms_condition_id' => 'nullable|exists:terms_conditions,id',
             'terms_content' => 'nullable|string',
-            'eligibility_id' => 'nullable|exists:eligibilities,id',
-            'eligibility_content' => 'nullable|string',
+            'methodology_id' => 'nullable|exists:methodologies,id',
+            'methodology_content' => 'nullable|string',
             'customer_name' => 'nullable|string|max:255',
             'customer_address' => 'nullable|string',
             'kind_att' => 'nullable|string|max:255',
+            'subject' => 'nullable|string|max:255',
             'status' => 'nullable|in:DRAFT,SENT,APPROVED,REVISED',
             'items' => 'required|array|min:1',
             'items.*.service_id' => 'nullable|exists:services,id',
@@ -121,11 +122,12 @@ class QuotationController extends Controller
                 'quotation_type',
                 'terms_condition_id',
                 'terms_content',
-                'eligibility_id',
-                'eligibility_content',
+                'methodology_id',
+                'methodology_content',
                 'customer_name',
                 'customer_address',
                 'kind_att',
+                'subject',
                 'status'
             ]);
             
@@ -195,7 +197,7 @@ class QuotationController extends Controller
             'enquiry',
             'company',
             'termsCondition',
-            'eligibility',
+            'methodology',
             'items.service',
             'items.serviceItem',
             'items.vendorCost.vendor',
@@ -220,7 +222,7 @@ class QuotationController extends Controller
             ->get()
             ->groupBy('category');
         $termsConditions = TermsCondition::where('is_active', true)->orderBy('title')->get();
-        $eligibilities = Eligibility::where('is_active', true)->orderBy('title')->get();
+        $methodologies = Methodology::where('is_active', true)->orderBy('title')->get();
         $vendors = Vendor::where('is_active', true)->orderBy('name')->get();
 
         return view('quotations.edit', compact(
@@ -230,7 +232,7 @@ class QuotationController extends Controller
             'enquiries',
             'services',
             'termsConditions',
-            'eligibilities',
+            'methodologies',
             'vendors'
         ));
     }
@@ -248,11 +250,12 @@ class QuotationController extends Controller
             'quotation_type' => 'required|in:OWN,THIRD_PARTY,MIXED',
             'terms_condition_id' => 'nullable|exists:terms_conditions,id',
             'terms_content' => 'nullable|string',
-            'eligibility_id' => 'nullable|exists:eligibilities,id',
-            'eligibility_content' => 'nullable|string',
+            'methodology_id' => 'nullable|exists:methodologies,id',
+            'methodology_content' => 'nullable|string',
             'customer_name' => 'nullable|string|max:255',
             'customer_address' => 'nullable|string',
             'kind_att' => 'nullable|string|max:255',
+            'subject' => 'nullable|string|max:255',
             'status' => 'nullable|in:DRAFT,SENT,APPROVED,REVISED',
             'items' => 'required|array|min:1',
             'items.*.service_id' => 'nullable|exists:services,id',
@@ -286,11 +289,12 @@ class QuotationController extends Controller
                 'quotation_type',
                 'terms_condition_id',
                 'terms_content',
-                'eligibility_id',
-                'eligibility_content',
+                'methodology_id',
+                'methodology_content',
                 'customer_name',
                 'customer_address',
                 'kind_att',
+                'subject',
                 'status'
             ]);
 
@@ -438,7 +442,7 @@ class QuotationController extends Controller
             'enquiry',
             'company',
             'termsCondition',
-            'eligibility',
+            'methodology',
             'items.service',
             'items.serviceItem',
             'createdBy'

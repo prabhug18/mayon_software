@@ -1,10 +1,11 @@
 @extends('layouts.backend')
-@section('title','Create Eligibility')
+@section('title','Edit Methodology')
 @section('content')
 <div class="card form-card shadow-lg border-0">
     <div class="card-body p-5">
-        <form id="terms-form" method="POST" action="{{ route('eligibilities.store') }}">
+        <form id="terms-form" method="POST" action="{{ route('methodologies.update', $methodology->id) }}">
             @csrf
+            @method('PUT')
             
             <div class="section-style mb-4">
                 <div class="section-title">
@@ -13,7 +14,7 @@
                 <div class="row g-4 mt-2">
                     <div class="col-md-8">
                         <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control custom-input" id="title" name="title" placeholder="e.g., Standard Quotation Terms" required>
+                        <input type="text" class="form-control custom-input" id="title" name="title" value="{{ $methodology->title }}" required>
                         <div class="invalid-feedback" id="title-error"></div>
                     </div>
                     <div class="col-md-4">
@@ -31,7 +32,7 @@
                     <i class="bi bi-file-richtext me-2"></i> Content
                 </div>
                 <div class="mt-4">
-                    <textarea class="form-control" id="terms_content" name="content" rows="12" required></textarea>
+                    <textarea class="form-control" id="terms_content" name="content" rows="12" required>{{ $methodology->content }}</textarea>
                     <div class="form-text mt-2">
                         <i class="bi bi-lightbulb text-warning me-1"></i>
                         <strong>Tip:</strong> Use the editor toolbar to format your content with headings, lists, bold text, etc.
@@ -46,7 +47,7 @@
                 </div>
                 <div class="mt-4">
                     <div class="form-check form-switch custom-switch">
-                        <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="1" checked>
+                        <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="1" {{ $methodology->is_active ? 'checked' : '' }}>
                         <label class="form-check-label ms-2" for="is_active">
                             <span class="fw-bold">Active</span>
                             <small class="text-muted d-block">This template will be available for selection</small>
@@ -56,9 +57,9 @@
             </div>
 
             <div class="d-flex gap-2 pt-2">
-                <a href="{{ route('eligibilities.index') }}" class="btn btn-outline-secondary px-4">Cancel</a>
+                <a href="{{ route('methodologies.index') }}" class="btn btn-outline-secondary px-4">Cancel</a>
                 <button type="submit" class="btn btn-custom px-5 py-2" id="submitBtn">
-                    <i class="bi bi-check-circle me-2"></i> Create Eligibility
+                    <i class="bi bi-check-circle me-2"></i> Update Methodology
                 </button>
             </div>
         </form>
@@ -88,12 +89,11 @@
 
 <script>
 $(document).ready(function(){
-    console.log('Terms Create Page - Initializing Editor');
+    console.log('Methodology Edit Page - Initializing Editor');
     
     function initEditor() {
         const $editor = $('#terms_content');
         
-        // Check plugin existence
         if (typeof $.fn.summernote !== 'function') {
             console.warn('Summernote Lite plugin not found yet, retrying in 500ms...');
             setTimeout(initEditor, 500);
@@ -108,7 +108,7 @@ $(document).ready(function(){
         console.log('Initializing Summernote Lite...');
         $editor.summernote({
             height: 300,
-            placeholder: 'Enter your terms and conditions here...',
+            placeholder: 'Enter your methodology details here...',
             toolbar: [
                 ['style', ['style']],
                 ['font', ['bold', 'italic', 'underline', 'clear']],
@@ -135,6 +135,8 @@ $(document).ready(function(){
     }
 
     initEditor();
+
+    // Clear validation errors on input
     $('input, select').on('input change', function(){
         $(this).removeClass('is-invalid');
         $('#' + $(this).attr('id') + '-error').text('');
@@ -146,7 +148,6 @@ $(document).ready(function(){
         $('.is-invalid').removeClass('is-invalid');
         $('.invalid-feedback').text('');
         
-        // Get content from Summernote
         const contentArea = $('#terms_content');
         const content = contentArea.summernote('code');
         
@@ -154,24 +155,23 @@ $(document).ready(function(){
             contentArea.addClass('is-invalid');
             $('.note-editor').addClass('is-invalid');
             $('#content-error').text('The content field is required.');
-            showAlert('Please enter terms and conditions content', 'error');
+            showAlert('Please enter methodology content', 'error');
             return;
         }
         
         const fd = new FormData(this);
-        // Update FormData with Summernote content
         fd.set('content', content);
         
         const submitBtn = $('#submitBtn');
         const originalText = submitBtn.html();
         
-        // Disable button and show loading
-        submitBtn.prop('disabled', true).html('<i class="bi bi-hourglass-split me-2"></i>Creating...');
+        submitBtn.prop('disabled', true).html('<i class="bi bi-hourglass-split me-2"></i>Updating...');
         
-        fetch('{{ route("eligibilities.store") }}', {
+        fetch('{{ route("methodologies.update", $methodology->id) }}', {
             method: 'POST',
             body: fd,
             headers: { 
+                'X-HTTP-Method-Override': 'PUT', 
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'), 
                 'Accept':'application/json' 
             }
@@ -181,8 +181,8 @@ $(document).ready(function(){
             return r.json(); 
         })
         .then(d => { 
-            showAlert(d.message||'Eligibility created successfully', 'success'); 
-            setTimeout(() => window.location.href='{{ route("eligibilities.index") }}', 900); 
+            showAlert(d.message||'Methodology updated successfully', 'success'); 
+            setTimeout(() => window.location.href='{{ route("methodologies.index") }}', 900); 
         })
         .catch(err => {
             submitBtn.prop('disabled', false).html(originalText);
@@ -198,7 +198,6 @@ $(document).ready(function(){
                 }
                 showAlert('Please fix the validation errors', 'error');
                 
-                // Scroll to first error
                 const firstError = $('.is-invalid').first();
                 if(firstError.length){
                     $('html, body').animate({
@@ -206,7 +205,7 @@ $(document).ready(function(){
                     }, 500);
                 }
             } else {
-                showAlert('Error creating Eligibility', 'error');
+                showAlert('Error updating Methodology', 'error');
             }
         });
     });

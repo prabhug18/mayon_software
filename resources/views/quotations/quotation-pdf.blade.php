@@ -36,7 +36,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         /* ───────── PAGE ───────── */
         @page {
             size: A4 portrait;
-            margin: 20mm 18mm 15mm 18mm;
+            margin: 165px 18mm 30mm 18mm;
         }
 
         body {
@@ -50,10 +50,13 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
 
         /* ───────── HEADER BAND ───────── */
         .header-band {
+            position: fixed;
+            top: -150px;
+            left: 0;
+            right: 0;
             width: 100%;
             border-collapse: collapse;
             border-bottom: 3px solid {{ $blue }};
-            margin-bottom: 18px;
         }
         .header-band td {
             vertical-align: middle;
@@ -269,11 +272,12 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
 
         /* ───────── BANK ───────── */
         .bank-box {
-            border: 1px solid #bfcae0;
+            border: 1px solid #b8daf7;
             padding: 10px 14px;
             margin-top: 18px;
             width: 320px;
-            background: #fafbfd;
+            background: #eef5fc;
+            border-radius: 4px;
         }
         .bank-heading {
             font-weight: bold;
@@ -432,10 +436,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
     {{-- SUBJECT                                --}}
     {{-- ═══════════════════════════════════════ --}}
     <div class="subject-line">
-        Sub: Quotation for {{ optional($quotation->items->first()?->service)->name ?? 'requested services' }}
-        @if($quotation->customer_name)
-            for {{ $quotation->customer_name }} site.
-        @endif
+        Sub: {{ $quotation->subject ?: ('Quotation for ' . (optional($quotation->items->first()?->service)->name ?? 'requested services') . ($quotation->customer_name ? ' for ' . $quotation->customer_name . ' site.' : '')) }}
     </div>
 
     {{-- ═══════════════════════════════════════ --}}
@@ -509,14 +510,13 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         </table>
     </div>
 
-    @if($quotation->eligibility_content || $quotation->eligibility)
+    @if($quotation->methodology_content || $quotation->methodology)
     <div class="terms-section">
-        <div class="section-heading">Eligibility</div>
         <div class="terms-body">
-            @if($quotation->eligibility_content)
-                {!! $quotation->eligibility_content !!}
+            @if($quotation->methodology_content)
+                {!! $quotation->methodology_content !!}
             @else
-                {!! $quotation->eligibility->content !!}
+                {!! $quotation->methodology->content !!}
             @endif
         </div>
     </div>
@@ -559,24 +559,20 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
     </div>
 
     {{-- ═══════════════════════════════════════ --}}
-    {{-- SIGNATURE                              --}}
+    {{-- SIGNATURE & DISCLAIMER                 --}}
     {{-- ═══════════════════════════════════════ --}}
-    <table class="sig-tbl">
-        <tr>
-            <td class="sig-left">
-                Thank you for your business!<br>
-                We look forward to working with you.
-            </td>
-            <td class="sig-right">
-                <div class="sig-for">For {{ $companyName }}</div>
-                @if($authSigSrc)
-                    <img src="{{ $authSigSrc }}" class="sig-img"><br>
-                @endif
-                <div class="sig-line">Authorized Signatory</div>
-                <div class="sig-note">(Computer generated document)</div>
-            </td>
-        </tr>
-    </table>
+    <div style="margin-top: 30px; page-break-inside: avoid; font-size: 8.5px; line-height: 1.5; color: #333;">
+        Thanking you,<br>
+        With Regards,<br>
+        <strong>For MAYON FLOORING</strong><br>
+        Authorized Signatory<br>
+        Sales Team<br>
+        PH: 8015468174 / 7022548598
+    </div>
+
+    <div style="text-align: center; margin-top: 25px; font-size: 8px; color: #888; font-style: italic; width: 100%; border-top: 1px dashed #ddd; padding-top: 8px;">
+        (Computer generated quotation, No signature required)
+    </div>
 
 </body>
 </html>

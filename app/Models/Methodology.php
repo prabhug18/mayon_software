@@ -3,10 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Eligibility extends Model
+class Methodology extends Model
 {
     use SoftDeletes;
 

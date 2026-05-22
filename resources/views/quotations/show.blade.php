@@ -104,6 +104,17 @@
         </div>
         @endif
 
+        @if($quotation->subject)
+        <div class="section-style mb-4">
+            <div class="section-title">
+                <i class="bi bi-info-circle me-2"></i> Subject
+            </div>
+            <div class="mt-3 p-3 bg-light rounded-3 fw-bold">
+                {{ $quotation->subject }}
+            </div>
+        </div>
+        @endif
+
         <div class="section-style mb-4">
             <div class="section-title">
                 <i class="bi bi-list-ul me-2"></i> Line Items
@@ -172,17 +183,13 @@
             </div>
         </div>
 
-        @if($quotation->eligibility_content || $quotation->eligibility)
+        @if($quotation->methodology_content || $quotation->methodology)
         <div class="section-style mt-5">
-            <div class="section-title">
-                <i class="bi bi-check-square me-2"></i> Eligibility
-            </div>
-            <div class="mt-3 p-4 bg-light rounded-3">
-                @if($quotation->eligibility_content)
-                    {!! $quotation->eligibility_content !!}
+            <div class="p-4 bg-light rounded-3">
+                @if($quotation->methodology_content)
+                    {!! $quotation->methodology_content !!}
                 @else
-                    <div class="fw-bold mb-2 text-primary">{{ $quotation->eligibility->title }}</div>
-                    {!! $quotation->eligibility->content !!}
+                    {!! $quotation->methodology->content !!}
                 @endif
             </div>
         </div>

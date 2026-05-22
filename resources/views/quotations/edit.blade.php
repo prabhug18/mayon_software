@@ -35,7 +35,7 @@
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Quotation Number <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="quotation_no" name="quotation_no" value="{{ $quotation->quotation_no }}" required style="background-color: #f8f9fa; border: 1px dashed #dee2e6;" />
+                        <input type="text" class="form-control" id="quotation_no" name="quotation_no" value="{{ $quotation->quotation_no }}" readonly required style="background-color: #f8f9fa; border: 1px dashed #dee2e6;" />
                         <div class="invalid-feedback" id="quotation_no-error"></div>
                     </div>
                     <div class="col-md-4 mb-3">
@@ -85,6 +85,13 @@
                             <option value="MIXED" {{ $quotation->quotation_type == 'MIXED' ? 'selected' : '' }}>Mixed</option>
                         </select>
                         <div class="invalid-feedback" id="quotation_type-error"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">Subject</label>
+                        <input type="text" class="form-control custom-input" id="subject" name="subject" value="{{ $quotation->subject }}" placeholder="Enter Subject (e.g. Quotation for Epoxy Flooring)" />
+                        <div class="invalid-feedback" id="subject-error"></div>
                     </div>
                 </div>
             </div>
@@ -137,14 +144,14 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <select class="form-select form-select-sm service-item-select {{ $item->manual_item_name ? 'd-none' : '' }}" name="items[{{ $index }}][service_item_id]" {{ $item->manual_item_name ? '' : 'required' }}>
+                                    <select class="form-select form-select-sm service-item-select {{ $item->manual_service_name ? 'd-none' : '' }}" name="items[{{ $index }}][service_item_id]" {{ $item->manual_service_name ? '' : 'required' }}>
                                         @if($item->service_item_id)
                                             <option value="{{ $item->service_item_id }}">{{ $item->serviceItem->item_name }}</option>
                                         @else
                                             <option value="">Select Item</option>
                                         @endif
                                     </select>
-                                    <input type="text" class="form-control form-control-sm manual-item-input {{ $item->manual_item_name ? '' : 'd-none' }}" name="items[{{ $index }}][manual_item_name]" value="{{ $item->manual_item_name }}" placeholder="Manual Item" />
+                                    <input type="text" class="form-control form-control-sm manual-item-input {{ $item->manual_service_name ? '' : 'd-none' }}" name="items[{{ $index }}][manual_item_name]" value="{{ $item->manual_item_name }}" placeholder="Manual Item" />
                                 </td>
                                 <td>
                                     <select class="form-select form-select-sm unit-input" name="items[{{ $index }}][unit]" required>
@@ -248,16 +255,16 @@
                         <div class="invalid-feedback" id="terms_condition_id-error"></div>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Eligibility</label>
-                        <select class="form-select custom-input" id="eligibility_id" name="eligibility_id">
-                            <option value="">Select Eligibility</option>
-                            @foreach($eligibilities as $el)
-                                <option value="{{ $el->id }}" {{ $quotation->eligibility_id == $el->id ? 'selected' : '' }}>
+                        <label class="form-label">Methodology</label>
+                        <select class="form-select custom-input" id="methodology_id" name="methodology_id">
+                            <option value="">Select Methodology</option>
+                            @foreach($methodologies as $el)
+                                <option value="{{ $el->id }}" {{ $quotation->methodology_id == $el->id ? 'selected' : '' }}>
                                     {{ $el->title }}
                                 </option>
                             @endforeach
                         </select>
-                        <div class="invalid-feedback" id="eligibility_id-error"></div>
+                        <div class="invalid-feedback" id="methodology_id-error"></div>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Status</label>
@@ -279,10 +286,10 @@
                 </div>
                 <div class="row">
                     <div class="col-12 mb-3">
-                        <label class="form-label">Editable Eligibility Content</label>
-                        <textarea id="eligibility_content" name="eligibility_content" class="form-control">{{ $quotation->eligibility_content }}</textarea>
-                        <div class="invalid-feedback" id="eligibility_content-error"></div>
-                        <small class="text-muted">Select an eligibility template above to load its content, then customize it for this quotation.</small>
+                        <label class="form-label">Editable Methodology Content</label>
+                        <textarea id="methodology_content" name="methodology_content" class="form-control">{{ $quotation->methodology_content }}</textarea>
+                        <div class="invalid-feedback" id="methodology_content-error"></div>
+                        <small class="text-muted">Select a methodology template above to load its content, then customize it for this quotation.</small>
                     </div>
                 </div>
             </div>
