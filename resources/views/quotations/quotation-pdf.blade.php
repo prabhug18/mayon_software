@@ -1,5 +1,32 @@
 @php
-$fmt = fn($v) => number_format((float)$v, 2);
+$fmt = function($v) {
+    $num = number_format((float)$v, 2, '.', '');
+    $exploded = explode('.', $num);
+    $whole = $exploded[0];
+    $decimal = isset($exploded[1]) ? $exploded[1] : '00';
+    
+    $isNegative = false;
+    if (strpos($whole, '-') === 0) {
+        $isNegative = true;
+        $whole = substr($whole, 1);
+    }
+    
+    $len = strlen($whole);
+    if ($len <= 3) {
+        $formatted = $whole;
+    } else {
+        $lastThree = substr($whole, -3);
+        $rest = substr($whole, 0, -3);
+        $restFormatted = '';
+        while (strlen($rest) > 2) {
+            $restFormatted = ',' . substr($rest, -2) . $restFormatted;
+            $rest = substr($rest, 0, -2);
+        }
+        $formatted = $rest . $restFormatted . ',' . $lastThree;
+    }
+    
+    return ($isNegative ? '-' : '') . $formatted . '.' . $decimal;
+};
 
 // Embed company logo as base64
 $companyLogoSrc = null;

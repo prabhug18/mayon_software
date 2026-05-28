@@ -49,7 +49,7 @@
                                 <strong>Category:</strong> <span class="ms-1">{{ optional($enquiry->service)->name ?? '-' }}</span>
                             </div>
                             <div class="mb-2">
-                                <strong>Item/Work:</strong> <span class="ms-1">{{ optional($enquiry->serviceItem)->name ?? '-' }}</span>
+                                <strong>Item/Work:</strong> <span class="ms-1">{{ optional($enquiry->serviceItem)->item_name ?? '-' }}</span>
                             </div>
                             <div class="mb-2">
                                 <strong>Type:</strong> <span class="ms-1">{{ optional($enquiry->enquiryType)->name ?? '-' }}</span>
@@ -112,6 +112,28 @@
                                                                     @php
                                                                         $formatVal = function($k, $v) {
                                                                             if ($v === null || $v === '') return 'empty';
+                                                                            
+                                                                            if ($k === 'service_id') {
+                                                                                $service = \App\Models\Service::find($v);
+                                                                                return $service ? $service->name : ('Service #' . $v);
+                                                                            }
+                                                                            if ($k === 'service_item_id') {
+                                                                                $item = \App\Models\ServiceItem::find($v);
+                                                                                return $item ? ($item->item_name ?: $item->name) : ('Service Item #' . $v);
+                                                                            }
+                                                                            if ($k === 'enquiry_type_id') {
+                                                                                $type = \App\Models\EnquiryType::find($v);
+                                                                                return $type ? $type->name : ('Enquiry Type #' . $v);
+                                                                            }
+                                                                            if ($k === 'source_id') {
+                                                                                $source = \App\Models\Source::find($v);
+                                                                                return $source ? $source->name : ('Source #' . $v);
+                                                                            }
+                                                                            if ($k === 'assigned_to') {
+                                                                                $user = \App\Models\User::find($v);
+                                                                                return $user ? $user->name : ('User #' . $v);
+                                                                            }
+                                                                            
                                                                             if (is_string($v) && (str_ends_with($k, '_at') || str_ends_with($k, 'date') || preg_match('/^\d{4}-\d{2}-\d{2}T/', $v))) {
                                                                                 try {
                                                                                     return \Carbon\Carbon::parse($v)->format('M j, Y h:i A');
@@ -119,10 +141,22 @@
                                                                             }
                                                                             return is_array($v) ? json_encode($v) : $v;
                                                                         };
+                                                                        
+                                                                        $formatLabel = function($k) {
+                                                                            $labels = [
+                                                                                'service_id' => 'Service',
+                                                                                'service_item_id' => 'Service Item',
+                                                                                'enquiry_type_id' => 'Enquiry Type',
+                                                                                'source_id' => 'Source',
+                                                                                'assigned_to' => 'Assigned To',
+                                                                            ];
+                                                                            return $labels[$k] ?? ucfirst(str_replace('_', ' ', $k));
+                                                                        };
+                                                                        
                                                                         $oldVal = $formatVal($key, $activity->changes['old'][$key] ?? null);
                                                                         $newVal = $formatVal($key, $value ?? null);
                                                                     @endphp
-                                                                    <strong>{{ ucfirst(str_replace('_', ' ', $key)) }}:</strong> 
+                                                                    <strong>{{ $formatLabel($key) }}:</strong> 
                                                                     @if($oldVal !== 'empty')
                                                                         <span class="text-decoration-line-through text-danger">{{ $oldVal }}</span> 
                                                                         <i class="bi bi-arrow-right mx-1"></i> 

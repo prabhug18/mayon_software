@@ -1,6 +1,36 @@
 @extends('layouts.backend')
 @section('title','Quotation Details')
 @section('content')
+@php
+$inr = function($v) {
+    $num = number_format((float)$v, 2, '.', '');
+    $exploded = explode('.', $num);
+    $whole = $exploded[0];
+    $decimal = isset($exploded[1]) ? $exploded[1] : '00';
+    
+    $isNegative = false;
+    if (strpos($whole, '-') === 0) {
+        $isNegative = true;
+        $whole = substr($whole, 1);
+    }
+    
+    $len = strlen($whole);
+    if ($len <= 3) {
+        $formatted = $whole;
+    } else {
+        $lastThree = substr($whole, -3);
+        $rest = substr($whole, 0, -3);
+        $restFormatted = '';
+        while (strlen($rest) > 2) {
+            $restFormatted = ',' . substr($rest, -2) . $restFormatted;
+            $rest = substr($rest, 0, -2);
+        }
+        $formatted = $rest . $restFormatted . ',' . $lastThree;
+    }
+    
+    return ($isNegative ? '-' : '') . $formatted . '.' . $decimal;
+};
+@endphp
 <div class="container">
     <div class="row">
         <div class="col-lg-12">
@@ -144,9 +174,9 @@
                             <td>{{ $item->description ?: '-' }}</td>
                             <td>{{ $item->unit }}</td>
                             <td>{{ $item->quantity }}</td>
-                            <td>₹ {{ number_format($item->selling_rate, 2) }}</td>
+                            <td>₹ {{ $inr($item->selling_rate) }}</td>
                             <td>{{ $item->gst_percentage }}%</td>
-                            <td class="text-end fw-bold">₹ {{ number_format($item->line_total, 2) }}</td>
+                            <td class="text-end fw-bold">₹ {{ $inr($item->line_total) }}</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -160,23 +190,23 @@
                     <div class="card-body p-4">
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Subtotal:</span>
-                            <span class="fw-bold">₹ {{ number_format($quotation->subtotal, 2) }}</span>
+                            <span class="fw-bold">₹ {{ $inr($quotation->subtotal) }}</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">GST Total:</span>
-                            <span class="fw-bold">₹ {{ number_format($quotation->gst_total, 2) }}</span>
+                            <span class="fw-bold">₹ {{ $inr($quotation->gst_total) }}</span>
                         </div>
                         @php
                             $roundOff = $quotation->grand_total - ($quotation->subtotal + $quotation->gst_total);
                         @endphp
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">Round Off:</span>
-                            <span class="fw-bold">₹ {{ number_format($roundOff, 2) }}</span>
+                            <span class="fw-bold">₹ {{ $inr($roundOff) }}</span>
                         </div>
                         <hr>
                         <div class="d-flex justify-content-between h5 mb-0">
                             <span class="fw-bold">Grand Total:</span>
-                            <span class="fw-bold text-primary">₹ {{ number_format($quotation->grand_total, 2) }}</span>
+                            <span class="fw-bold text-primary">₹ {{ $inr($quotation->grand_total) }}</span>
                         </div>
                     </div>
                 </div>
