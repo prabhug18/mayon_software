@@ -487,7 +487,8 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
                 <td class="sno-col">{{ $index + 1 }}</td>
                 <td class="desc-col">
                     @php
-                        $svcName = optional($item->service)->name ?? $item->manual_service_name;
+                        $isManual = is_null($item->service_id);
+                        $svcName = $isManual ? $item->manual_service_name : null;
                         $itemName = optional($item->serviceItem)->item_name ?? $item->manual_item_name;
                     @endphp
                     @if($svcName)

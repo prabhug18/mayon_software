@@ -155,8 +155,17 @@ $groupedItems = $quotation->items->groupBy('service_id');
                     <tr>
                         <td>{{ $loop->iteration }}</td>
                         <td>
-                            <div style="font-weight:bold; color:#2563EB;">{{ optional($item->service)->name ?? $item->manual_service_name ?? '-' }}</div>
-                            <div style="font-size:11px; color:#666; margin-top:2px;">{{ optional($item->serviceItem)->item_name ?? $item->manual_item_name ?? '-' }}</div>
+                            @php
+                                $isManual = is_null($item->service_id);
+                                $svcName = $isManual ? $item->manual_service_name : null;
+                                $itemName = optional($item->serviceItem)->item_name ?? $item->manual_item_name;
+                            @endphp
+                            @if($svcName)
+                                <div style="font-weight:bold; color:#2563EB;">{{ $svcName }}</div>
+                            @endif
+                            @if($itemName)
+                                <div style="font-size:11px; color:#666; margin-top:2px;">{{ $itemName }}</div>
+                            @endif
                         </td>
                         <td style="font-size:11px;color:#666">{{ $item->description ?: '-' }}</td>
                         <td>{{ $item->unit }}</td>
