@@ -164,7 +164,7 @@ $groupedItems = $quotation->items->groupBy('service_id');
                                 <div style="font-weight:bold; color:#2563EB;">{{ $svcName }}</div>
                             @endif
                             @if($itemName)
-                                <div style="font-size:11px; color:#666; margin-top:2px;">{{ $itemName }}</div>
+                                <div style="font-size:12px; font-weight:bold; color:#1a3a8a; margin-top:2px;">{{ $itemName }}</div>
                             @endif
                         </td>
                         <td style="font-size:11px;color:#666">{{ $item->description ?: '-' }}</td>

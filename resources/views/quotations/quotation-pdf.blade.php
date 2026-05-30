@@ -219,8 +219,8 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             margin-bottom: 2px;
         }
         .item-sub-name {
-            font-size: 7.5px;
-            color: #6c757d;
+            font-size: 9px;
+            color: {{ $blue }};
             font-weight: bold;
             display: block;
             margin-bottom: 2px;
@@ -273,7 +273,6 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         /* ───────── TERMS ───────── */
         .terms-section {
             margin-top: 25px;
-            page-break-inside: avoid;
         }
         .section-heading {
             font-size: 10px;
@@ -305,6 +304,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             width: 320px;
             background: #eef5fc;
             border-radius: 4px;
+            page-break-inside: avoid;
         }
         .bank-heading {
             font-weight: bold;
