@@ -12,6 +12,7 @@ use App\Models\Methodology;
 use App\Models\Vendor;
 use App\Models\QuotationItem;
 use App\Models\QuotationVendorCost;
+use App\Models\Unit;
 use App\Services\QuotationCalculator;
 use Illuminate\Http\Request;
 use App\Traits\APIResponse;
@@ -60,6 +61,7 @@ class QuotationController extends Controller
         $termsConditions = TermsCondition::where('is_active', true)->orderBy('title')->get();
         $methodologies = Methodology::where('is_active', true)->orderBy('title')->get();
         $vendors = Vendor::where('is_active', true)->orderBy('name')->get();
+        $units = Unit::orderBy('name')->get();
 
         return view('quotations.create', compact(
             'heading',
@@ -69,7 +71,8 @@ class QuotationController extends Controller
             'services',
             'termsConditions',
             'methodologies',
-            'vendors'
+            'vendors',
+            'units'
         ));
     }
 
@@ -97,7 +100,7 @@ class QuotationController extends Controller
             'items.*.manual_service_name' => 'nullable|string|max:255',
             'items.*.manual_item_name' => 'nullable|string|max:255',
             'items.*.description' => 'nullable|string',
-            'items.*.unit' => 'required|in:SQM,RMT,SFT,NOS,LS',
+            'items.*.unit' => 'required|exists:units,name',
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.base_cost' => 'nullable|numeric|min:0',
             'items.*.margin_type' => 'required|in:PERCENTAGE,FIXED',
@@ -224,6 +227,7 @@ class QuotationController extends Controller
         $termsConditions = TermsCondition::where('is_active', true)->orderBy('title')->get();
         $methodologies = Methodology::where('is_active', true)->orderBy('title')->get();
         $vendors = Vendor::where('is_active', true)->orderBy('name')->get();
+        $units = Unit::orderBy('name')->get();
 
         return view('quotations.edit', compact(
             'heading',
@@ -233,7 +237,8 @@ class QuotationController extends Controller
             'services',
             'termsConditions',
             'methodologies',
-            'vendors'
+            'vendors',
+            'units'
         ));
     }
 
@@ -263,7 +268,7 @@ class QuotationController extends Controller
             'items.*.manual_service_name' => 'nullable|string|max:255',
             'items.*.manual_item_name' => 'nullable|string|max:255',
             'items.*.description' => 'nullable|string',
-            'items.*.unit' => 'required|in:SQM,RMT,SFT,NOS,LS',
+            'items.*.unit' => 'required|exists:units,name',
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.base_cost' => 'nullable|numeric|min:0',
             'items.*.margin_type' => 'required|in:PERCENTAGE,FIXED',

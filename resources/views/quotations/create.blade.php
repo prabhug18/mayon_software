@@ -251,11 +251,10 @@
         </td>
         <td>
             <select class="form-select form-select-sm unit-input" name="items[INDEX][unit]" required>
-                <option value="SQM">SQM</option>
-                <option value="RMT">RMT</option>
-                <option value="SFT">SFT</option>
-                <option value="NOS">NOS</option>
-                <option value="LS">LS</option>
+                <option value="">Select Unit</option>
+                @foreach($units as $unit)
+                    <option value="{{ $unit->name }}">{{ $unit->name }}</option>
+                @endforeach
             </select>
         </td>
         <td>

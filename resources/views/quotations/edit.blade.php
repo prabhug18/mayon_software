@@ -155,11 +155,10 @@
                                 </td>
                                 <td>
                                     <select class="form-select form-select-sm unit-input" name="items[{{ $index }}][unit]" required>
-                                        <option value="SQM" {{ $item->unit == 'SQM' ? 'selected' : '' }}>SQM</option>
-                                        <option value="RMT" {{ $item->unit == 'RMT' ? 'selected' : '' }}>RMT</option>
-                                        <option value="SFT" {{ $item->unit == 'SFT' ? 'selected' : '' }}>SFT</option>
-                                        <option value="NOS" {{ $item->unit == 'NOS' ? 'selected' : '' }}>NOS</option>
-                                        <option value="LS" {{ $item->unit == 'LS' ? 'selected' : '' }}>LS</option>
+                                        <option value="">Select Unit</option>
+                                        @foreach($units as $unit)
+                                            <option value="{{ $unit->name }}" {{ $item->unit == $unit->name ? 'selected' : '' }}>{{ $unit->name }}</option>
+                                        @endforeach
                                     </select>
                                 </td>
                                 <td>
@@ -334,11 +333,10 @@
         </td>
         <td>
             <select class="form-select form-select-sm unit-input" name="items[INDEX][unit]" required>
-                <option value="SQM">SQM</option>
-                <option value="RMT">RMT</option>
-                <option value="SFT">SFT</option>
-                <option value="NOS">NOS</option>
-                <option value="LS">LS</option>
+                <option value="">Select Unit</option>
+                @foreach($units as $unit)
+                    <option value="{{ $unit->name }}">{{ $unit->name }}</option>
+                @endforeach
             </select>
         </td>
         <td>
