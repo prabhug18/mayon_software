@@ -141,8 +141,9 @@ $groupedItems = $quotation->items->groupBy('service_id');
                 <thead>
                     <tr>
                         <th style="width:5%">#</th>
-                        <th style="width:30%">Item</th>
-                        <th style="width:30%">Description</th>
+                        <th style="width:25%">Item</th>
+                        <th style="width:25%">Description</th>
+                        <th style="width:10%">HSN/SAC</th>
                         <th style="width:8%">Unit</th>
                         <th style="width:8%">Qty</th>
                         <th style="width:12%">Rate</th>
@@ -168,6 +169,7 @@ $groupedItems = $quotation->items->groupBy('service_id');
                             @endif
                         </td>
                         <td style="font-size:11px;color:#666">{{ $item->description ?: '-' }}</td>
+                        <td style="font-size:11px">{{ optional($item->serviceItem)->hsn_sac_code ?: '-' }}</td>
                         <td>{{ $item->unit }}</td>
                         <td>{{ $fmt($item->quantity) }}</td>
                         <td>₹ {{ $fmt($item->selling_rate) }}</td>

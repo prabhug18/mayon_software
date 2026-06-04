@@ -205,6 +205,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
 
         .sno-col   { width: 28px; text-align: center; }
         .desc-col  { /* auto width - takes remaining */ }
+        .hsn-col   { width: 55px; text-align: center; }
         .unit-col  { width: 40px; text-align: center; }
         .qty-col   { width: 45px; text-align: center; }
         .rate-col  { width: 65px; text-align: right; }
@@ -474,6 +475,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             <tr>
                 <th class="sno-col">S.No</th>
                 <th class="desc-col">Description of Goods &amp; Services</th>
+                <th class="hsn-col">HSN / SAC / CODE</th>
                 <th class="unit-col">Unit</th>
                 <th class="qty-col">Qty</th>
                 <th class="rate-col">Rate (&#x20B9;)</th>
@@ -501,6 +503,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
                         <div class="item-desc-text" style="font-size: 8.5px; margin-top: 2px;">{!! nl2br(e($item->description)) !!}</div>
                     @endif
                 </td>
+                <td class="hsn-col">{{ optional($item->serviceItem)->hsn_sac_code ?: '-' }}</td>
                 <td class="unit-col">{{ $item->unit }}</td>
                 <td class="qty-col">{{ $item->quantity }}</td>
                 <td class="rate-col">{{ $fmt($item->selling_rate) }}</td>
