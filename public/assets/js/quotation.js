@@ -664,7 +664,24 @@ window.Quotation = (function () {
             itemSelect.addEventListener('change', function () {
                 const selected = this.options[this.selectedIndex];
                 if (selected && selected.dataset) {
-                    if (unitInput) unitInput.value = selected.dataset.unit || '';
+                    if (unitInput) {
+                        let unitToSet = selected.dataset.unit || '';
+                        if (unitToSet) {
+                            let matchFound = false;
+                            for (let i = 0; i < unitInput.options.length; i++) {
+                                if (unitInput.options[i].value.toLowerCase() === unitToSet.toLowerCase()) {
+                                    unitInput.value = unitInput.options[i].value;
+                                    matchFound = true;
+                                    break;
+                                }
+                            }
+                            if (!matchFound) {
+                                unitInput.value = unitToSet;
+                            }
+                        } else {
+                            unitInput.value = '';
+                        }
+                    }
                     if (descInput && !descInput.value) descInput.value = selected.dataset.description || '';
                     if (gstInput) gstInput.value = selected.dataset.gst || 18;
                     const baseCostInput = mainRow.querySelector('.base-cost-input');
