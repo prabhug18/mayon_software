@@ -63,7 +63,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         /* ───────── PAGE ───────── */
         @page {
             size: A4 portrait;
-            margin: 165px 18mm 30mm 18mm;
+            margin: 120px 15mm 15mm 15mm;
         }
 
         body {
@@ -78,7 +78,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         /* ───────── HEADER BAND ───────── */
         .header-band {
             position: fixed;
-            top: -150px;
+            top: -110px;
             left: 0;
             right: 0;
             width: 100%;
@@ -87,7 +87,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         }
         .header-band td {
             vertical-align: middle;
-            padding: 0 0 12px 0;
+            padding: 0 0 6px 0;
         }
         .hdr-logo-cell {
             width: 40%;
@@ -97,15 +97,15 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             text-align: right;
         }
         .logo-img {
-            max-height: 60px;
-            max-width: 200px;
+            max-height: 50px;
+            max-width: 180px;
         }
         .company-name-text {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: bold;
             color: {{ $blue }};
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
         .company-addr {
             font-size: 8px;
@@ -118,7 +118,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         .details-grid {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
         }
         .details-grid td {
             vertical-align: top;
@@ -171,8 +171,8 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             font-size: 10px;
             font-weight: bold;
             color: {{ $darkText }};
-            margin-bottom: 18px;
-            padding: 8px 12px;
+            margin-bottom: 10px;
+            padding: 6px 10px;
             background: {{ $lightBlue }};
             border-left: 4px solid {{ $blue }};
         }
@@ -181,7 +181,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         .items-tbl {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
             page-break-inside: auto;
         }
         .items-tbl th {
@@ -196,9 +196,9 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         }
         .items-tbl td {
             border: 1px solid #bfcae0;
-            padding: 8px 6px;
+            padding: 5px 4px;
             vertical-align: top;
-            font-size: 8.5px;
+            font-size: 8px;
             page-break-inside: auto;
             word-wrap: break-word;
         }
@@ -243,7 +243,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         /* ───────── TOTALS ───────── */
         .totals-outer {
             width: 100%;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
         .totals-tbl {
             width: 250px;
@@ -280,7 +280,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
 
         /* ───────── TERMS ───────── */
         .terms-section {
-            margin-top: 25px;
+            margin-top: 12px;
             page-break-inside: auto;
         }
         .section-heading {
@@ -345,7 +345,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         .sig-tbl {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 45px;
+            margin-top: 20px;
         }
         .sig-tbl td {
             vertical-align: bottom;
@@ -364,7 +364,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             font-weight: bold;
             color: {{ $darkText }};
             font-size: 10px;
-            margin-bottom: 50px;
+            margin-bottom: 25px;
         }
         .sig-img {
             max-height: 50px;
@@ -600,7 +600,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
     {{-- ═══════════════════════════════════════ --}}
     {{-- SIGNATURE & DISCLAIMER                 --}}
     {{-- ═══════════════════════════════════════ --}}
-    <div style="margin-top: 30px; page-break-inside: avoid; font-size: 8.5px; line-height: 1.5; color: #333;">
+    <div style="margin-top: 15px; font-size: 8.5px; line-height: 1.5; color: #333;">
         Thanking you,<br>
         With Regards,<br>
         <strong>For MAYON FLOORING</strong><br>
@@ -609,7 +609,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         PH: 8015468174 / 7022548598
     </div>
 
-    <div style="text-align: center; margin-top: 25px; font-size: 8px; color: #888; font-style: italic; width: 100%; border-top: 1px dashed #ddd; padding-top: 8px;">
+    <div style="text-align: center; margin-top: 10px; font-size: 8px; color: #888; font-style: italic; width: 100%; border-top: 1px dashed #ddd; padding-top: 5px;">
         (Computer generated quotation, No signature required)
     </div>
 
