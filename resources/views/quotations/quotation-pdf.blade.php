@@ -367,7 +367,8 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             font-weight: bold;
             color: {{ $blue }};
             font-size: 9px;
-            margin-bottom: 20px;
+            margin-top: 8px;
+            margin-bottom: 8px;
             display: block;
         }
         .sig-name {
@@ -600,9 +601,8 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             <td class="footer-sig-cell">
                 <div class="sig-block">
                     Thanking you,<br>
-                    With Regards,<br><br>
+                    With Regards,
                     <span class="sig-for-label">For MAYON FLOORING</span>
-                    <br><br>
                     <span class="sig-name">Authorized Signatory</span><br>
                     <span class="sig-designation">Sales Team</span><br>
                     <span class="sig-designation">PH: 8015468174 / 7022548598</span>
