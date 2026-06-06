@@ -305,80 +305,42 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             margin-bottom: 4px;
         }
 
-        /* ───────── FOOTER STRIP (Bank + Signature) ───────── */
-        .footer-strip {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            page-break-inside: avoid;
+        /* ───────── BANK + SIGNATURE PAGE ───────── */
+        .closing-page {
+            page-break-before: always;
         }
-        .footer-strip > tr > td {
-            vertical-align: top;
-            padding: 0;
-        }
-        .footer-bank-cell {
-            width: 55%;
-            padding-right: 15px;
-        }
-        .footer-sig-cell {
-            width: 45%;
-            text-align: right;
-        }
-
         .bank-box {
             border: 1px solid #b8daf7;
-            padding: 8px 10px;
+            padding: 10px 14px;
+            margin-top: 10px;
+            width: 320px;
             background: #eef5fc;
             border-radius: 4px;
         }
         .bank-heading {
             font-weight: bold;
             color: {{ $blue }};
-            font-size: 8px;
+            font-size: 9px;
             text-transform: uppercase;
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             border-bottom: 1px solid #bfcae0;
-            padding-bottom: 3px;
+            padding-bottom: 4px;
         }
         .bank-tbl {
             width: 100%;
             border-collapse: collapse;
         }
         .bank-tbl td {
-            padding: 1.5px 0;
-            font-size: 8px;
+            padding: 2px 0;
+            font-size: 8.5px;
         }
         .bank-key {
             font-weight: bold;
             color: {{ $darkText }};
-            width: 80px;
+            width: 90px;
         }
         .bank-value {
             color: {{ $grayText }};
-        }
-
-        .sig-block {
-            font-size: 8.5px;
-            line-height: 1.6;
-            color: #333;
-            text-align: right;
-        }
-        .sig-for-label {
-            font-weight: bold;
-            color: {{ $blue }};
-            font-size: 9px;
-            margin-top: 8px;
-            margin-bottom: 8px;
-            display: block;
-        }
-        .sig-name {
-            font-weight: bold;
-            color: {{ $darkText }};
-            font-size: 9px;
-        }
-        .sig-designation {
-            color: {{ $grayText }};
-            font-size: 8px;
         }
     </style>
 </head>
@@ -582,37 +544,32 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
     </div>
 
     {{-- ═══════════════════════════════════════ --}}
-    {{-- BANK DETAILS + SIGNATURE (side-by-side) --}}
+    {{-- BANK DETAILS + SIGNATURE (separate page) --}}
     {{-- ═══════════════════════════════════════ --}}
-    <table class="footer-strip">
-        <tr>
-            <td class="footer-bank-cell">
-                <div class="bank-box">
-                    <div class="bank-heading">Bank Account Details</div>
-                    <table class="bank-tbl">
-                        <tr><td class="bank-key">Beneficiary:</td><td class="bank-value">MAYON INTERIORS INFRA SOLUTION</td></tr>
-                        <tr><td class="bank-key">Bank:</td><td class="bank-value">State Bank of India</td></tr>
-                        <tr><td class="bank-key">Account No:</td><td class="bank-value">40933397145</td></tr>
-                        <tr><td class="bank-key">Branch:</td><td class="bank-value">Old Madras Road, KR Puram</td></tr>
-                        <tr><td class="bank-key">IFSC Code:</td><td class="bank-value">SBIN0040744</td></tr>
-                    </table>
-                </div>
-            </td>
-            <td class="footer-sig-cell">
-                <div class="sig-block">
-                    Thanking you,<br>
-                    With Regards,
-                    <span class="sig-for-label">For MAYON FLOORING</span>
-                    <span class="sig-name">Authorized Signatory</span><br>
-                    <span class="sig-designation">Sales Team</span><br>
-                    <span class="sig-designation">PH: 8015468174 / 7022548598</span>
-                </div>
-            </td>
-        </tr>
-    </table>
+    <div class="closing-page">
+        <div class="bank-box">
+            <div class="bank-heading">Bank Account Details</div>
+            <table class="bank-tbl">
+                <tr><td class="bank-key">Beneficiary:</td><td class="bank-value">MAYON INTERIORS INFRA SOLUTION</td></tr>
+                <tr><td class="bank-key">Bank:</td><td class="bank-value">State Bank of India</td></tr>
+                <tr><td class="bank-key">Account No:</td><td class="bank-value">40933397145</td></tr>
+                <tr><td class="bank-key">Branch:</td><td class="bank-value">Old Madras Road, KR Puram</td></tr>
+                <tr><td class="bank-key">IFSC Code:</td><td class="bank-value">SBIN0040744</td></tr>
+            </table>
+        </div>
 
-    <div style="text-align: center; margin-top: 8px; font-size: 7px; color: #aaa; font-style: italic; width: 100%; border-top: 1px dashed #ddd; padding-top: 4px;">
-        (Computer generated quotation, No signature required)
+        <div style="margin-top: 30px; font-size: 8.5px; line-height: 1.6; color: #333;">
+            Thanking you,<br>
+            With Regards,<br><br>
+            <strong style="color: {{ $blue }}; font-size: 10px;">For MAYON FLOORING</strong><br><br>
+            Authorized Signatory<br>
+            Sales Team<br>
+            PH: 8015468174 / 7022548598
+        </div>
+
+        <div style="text-align: center; margin-top: 25px; font-size: 8px; color: #888; font-style: italic; width: 100%; border-top: 1px dashed #ddd; padding-top: 8px;">
+            (Computer generated quotation, No signature required)
+        </div>
     </div>
 
 </body>
