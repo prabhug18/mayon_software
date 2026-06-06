@@ -63,7 +63,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         /* ───────── PAGE ───────── */
         @page {
             size: A4 portrait;
-            margin: 120px 15mm 15mm 15mm;
+            margin: 95px 15mm 15mm 15mm;
         }
 
         body {
@@ -78,16 +78,16 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         /* ───────── HEADER BAND ───────── */
         .header-band {
             position: fixed;
-            top: -110px;
+            top: -85px;
             left: 0;
             right: 0;
             width: 100%;
             border-collapse: collapse;
-            border-bottom: 3px solid {{ $blue }};
+            border-bottom: 2px solid {{ $blue }};
         }
         .header-band td {
             vertical-align: middle;
-            padding: 0 0 6px 0;
+            padding: 0 0 4px 0;
         }
         .hdr-logo-cell {
             width: 40%;
@@ -97,28 +97,28 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             text-align: right;
         }
         .logo-img {
-            max-height: 50px;
-            max-width: 180px;
+            max-height: 40px;
+            max-width: 160px;
         }
         .company-name-text {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
             color: {{ $blue }};
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         .company-addr {
-            font-size: 8px;
+            font-size: 7px;
             color: {{ $grayText }};
-            line-height: 1.5;
-            margin-top: 3px;
+            line-height: 1.4;
+            margin-top: 2px;
         }
 
         /* ───────── DETAILS GRID ───────── */
         .details-grid {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
         }
         .details-grid td {
             vertical-align: top;
@@ -133,10 +133,10 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             color: {{ $blue }};
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
         .to-name {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
             color: {{ $darkText }};
         }
@@ -144,7 +144,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             font-size: 9px;
             color: {{ $grayText }};
             line-height: 1.5;
-            margin-top: 3px;
+            margin-top: 2px;
         }
 
         .ref-table {
@@ -152,8 +152,8 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             margin-left: auto;
         }
         .ref-table td {
-            padding: 3px 0;
-            font-size: 10px;
+            padding: 2px 0;
+            font-size: 9px;
         }
         .ref-label {
             font-weight: bold;
@@ -168,13 +168,13 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
 
         /* ───────── SUBJECT ───────── */
         .subject-line {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: bold;
             color: {{ $darkText }};
-            margin-bottom: 10px;
-            padding: 6px 10px;
+            margin-bottom: 6px;
+            padding: 4px 8px;
             background: {{ $lightBlue }};
-            border-left: 4px solid {{ $blue }};
+            border-left: 3px solid {{ $blue }};
         }
 
         /* ───────── ITEMS TABLE ───────── */
