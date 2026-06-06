@@ -182,6 +182,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 15px;
+            page-break-inside: auto;
         }
         .items-tbl th {
             background: {{ $blue }};
@@ -198,6 +199,12 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             padding: 8px 6px;
             vertical-align: top;
             font-size: 8.5px;
+            page-break-inside: auto;
+            word-wrap: break-word;
+        }
+        .items-tbl tr {
+            page-break-inside: auto;
+            page-break-after: auto;
         }
         .items-tbl tr:nth-child(even) td {
             background: #f8f9fc;
@@ -274,6 +281,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         /* ───────── TERMS ───────── */
         .terms-section {
             margin-top: 25px;
+            page-break-inside: auto;
         }
         .section-heading {
             font-size: 10px;
