@@ -63,7 +63,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         /* ───────── PAGE ───────── */
         @page {
             size: A4 portrait;
-            margin: 95px 15mm 15mm 15mm;
+            margin: 115px 15mm 15mm 15mm;
         }
 
         body {
@@ -78,7 +78,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         /* ───────── HEADER BAND ───────── */
         .header-band {
             position: fixed;
-            top: -85px;
+            top: -105px;
             left: 0;
             right: 0;
             width: 100%;
