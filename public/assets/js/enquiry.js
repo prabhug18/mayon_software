@@ -2,21 +2,43 @@ window.Enquiry = (function () {
     let deleteTargetId = null;
     function initList(selector) {
         const table = $(selector).DataTable({
-            ajax: { url: '/enquiries', dataSrc: 'data' },
+            ajax: { 
+                url: '/enquiries', 
+                data: function(d) {
+                    d.period = $('#date_filter').val();
+                    d.year = $('#year_filter').val();
+                    d.from = $('#from_date').val();
+                    d.to = $('#to_date').val();
+                    d.source_id = $('#source_filter').val();
+                    d.status = $('#status_filter').val();
+                    d.service_id = $('#service_filter').val();
+                },
+                dataSrc: 'data' 
+            },
+            order: [],
             columns: [
-                { 
+                {
                     data: null,
                     render: function (data, type, row, meta) {
                         return meta.row + meta.settings._iDisplayStart + 1;
                     }
                 },
-                { 
+                {
                     data: null,
                     render: function (row) {
-                        return `<strong>${row.name}</strong><br><small class="text-muted">${row.mobile || ''}</small>`;
+                        let monthBadge = '';
+                        const dateStr = row.fb_created_at || row.created_at;
+                        if (dateStr) {
+                            try {
+                                const d = new Date(dateStr);
+                                const month = d.toLocaleString('default', { month: 'short' }).toUpperCase();
+                                monthBadge = `<span class="badge bg-light text-primary border border-primary me-2" style="font-size: 0.65rem; padding: 0.2em 0.4em;">${month}</span>`;
+                            } catch (e) {}
+                        }
+                        return `${monthBadge}<strong>${row.name}</strong><br><small class="text-muted">${row.mobile || ''}</small>`;
                     }
                 },
-                { 
+                {
                     data: null,
                     render: function (row) {
                         const s = (row.service && row.service.name) || '-';
@@ -24,7 +46,43 @@ window.Enquiry = (function () {
                         return `${s}${i ? '<br><small class="text-muted">' + i + '</small>' : ''}`;
                     }
                 },
-                { 
+                {
+                    data: null,
+                    render: function (row) {
+                        let sourceName = (row.source && row.source.name) || 'Unknown';
+                        if (row.fb_lead_id || (row.source && row.source.name === 'Facebook')) {
+                            let fbDate = '';
+                            if (row.fb_created_at) {
+                                try {
+                                    const d = new Date(row.fb_created_at);
+                                    fbDate = `<br><small class="text-muted" style="font-size: 0.75rem;">Created: ${d.toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</small>`;
+                                } catch (e) { }
+                            }
+                            return `<span class="badge" style="background-color: #e7f1ff; color: #0d6efd; border: 1px solid #9ec5fe; padding: 0.4em 0.6em;"><i class="bi bi-facebook me-1"></i> Facebook</span>${fbDate}`;
+                        }
+
+                        // Stylized badge for custom sources
+                        let badgeStyle = 'background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;';
+                        let icon = '<i class="bi bi-tag me-1"></i>';
+                        const sLower = sourceName.toLowerCase();
+                        if (sLower.includes('telecalling') || sLower.includes('cold call') || sLower.includes('call')) {
+                            badgeStyle = 'background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;';
+                            icon = '<i class="bi bi-telephone-inbound me-1"></i> ';
+                        } else if (sLower.includes('excel') || sLower.includes('sheet') || sLower.includes('import')) {
+                            badgeStyle = 'background-color: #f0fdf4; color: #15803d; border: 1px solid #86efac;';
+                            icon = '<i class="bi bi-file-earmark-excel me-1"></i> ';
+                        } else if (sLower.includes('website') || sLower.includes('web')) {
+                            badgeStyle = 'background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;';
+                            icon = '<i class="bi bi-globe me-1"></i> ';
+                        } else if (sLower.includes('referral') || sLower.includes('friend')) {
+                            badgeStyle = 'background-color: #fdf4ff; color: #a21caf; border: 1px solid #f0abfc;';
+                            icon = '<i class="bi bi-people me-1"></i> ';
+                        }
+
+                        return `<span class="badge" style="${badgeStyle} padding: 0.4em 0.6em;">${icon}${sourceName}</span>`;
+                    }
+                },
+                {
                     data: 'priority',
                     render: function (p) {
                         let cls = 'bg-info text-dark';
@@ -33,7 +91,7 @@ window.Enquiry = (function () {
                         return `<span class="badge ${cls} extra-small">${p || 'Medium'}</span>`;
                     }
                 },
-                { 
+                {
                     data: 'status',
                     render: function (s) {
                         let cls = 'bg-secondary';
@@ -43,17 +101,17 @@ window.Enquiry = (function () {
                         return `<span class="badge ${cls} extra-small">${s || 'Open'}</span>`;
                     }
                 },
-                { 
+                {
                     data: null,
                     render: function (row) {
                         return (row.assigned_to && row.assigned_to.name) || '<span class="text-muted small">Unassigned</span>';
                     }
                 },
-                { 
+                {
                     data: 'next_follow_up_at',
                     render: function (dt) {
                         if (!dt) return '-';
-                        try { const d = new Date(dt); return d.toLocaleString([], {dateStyle: 'medium', timeStyle: 'short'}); } catch (e) { return dt; }
+                        try { const d = new Date(dt); return d.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }); } catch (e) { return dt; }
                     }
                 },
                 {
@@ -68,6 +126,20 @@ window.Enquiry = (function () {
             ]
         });
         window.EnquiryTable = table;
+
+        // Filter event listeners
+        $('#date_filter').on('change', function() {
+            if ($(this).val() === 'custom') {
+                $('.custom-date-container').removeClass('d-none');
+            } else {
+                $('.custom-date-container').addClass('d-none');
+                table.ajax.reload();
+            }
+        });
+
+        $('#source_filter, #status_filter, #service_filter, #year_filter, #from_date, #to_date').on('change', function() {
+            table.ajax.reload();
+        });
     }
 
     function initForm(selector) {
@@ -141,7 +213,7 @@ window.Enquiry = (function () {
     }
 
     function confirmDelete(id) { deleteTargetId = id; new bootstrap.Modal(document.getElementById('deleteModal')).show(); document.getElementById('deleteModalConfirmBtn').onclick = performDelete; }
-    
+
     // Alias for confirmDelete to match show page
     function deleteEnquiry(id) { confirmDelete(id); }
 
@@ -162,7 +234,7 @@ window.Enquiry = (function () {
                         showAlert('Comment added');
                         document.getElementById('comment-body').value = '';
                         // Refresh to show in comments tab or just reload
-                        location.reload(); 
+                        location.reload();
                     })
                     .catch(function (err) { if (err && err.validation && err.validation.errors) { const errors = err.validation.errors; for (const k in errors) { const el = document.getElementById(k + '-error'); if (el) el.textContent = errors[k][0]; const inp = document.getElementById(k); if (inp) inp.classList.add('is-invalid'); } } else { showAlert('Error posting comment'); } });
             });

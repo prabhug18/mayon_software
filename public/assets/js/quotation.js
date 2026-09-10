@@ -42,10 +42,22 @@ window.Quotation = (function () {
             return;
         }
 
-        // Company change -> fetch quotation number
+        // Initialize Select2 for Enquiry
+        $('#enquiry_id').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Select Enquiry',
+            allowClear: true
+        });
+
+        // Initialize Select2 for Company
+        $('#company_id').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Select Company'
+        });
+
         const companySelect = document.getElementById('company_id');
         if (companySelect) {
-            companySelect.addEventListener('change', function () {
+            $(companySelect).on('change', function () {
                 const companyId = this.value;
                 if (!companyId) return;
                 fetch(`/quotations/next-number?company_id=${companyId}`, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
@@ -62,7 +74,7 @@ window.Quotation = (function () {
         // Enquiry change -> fetch enquiry details and populate items
         const enquirySelect = document.getElementById('enquiry_id');
         if (enquirySelect) {
-            enquirySelect.addEventListener('change', function () {
+            $(enquirySelect).on('change', function () {
                 const enquiryId = this.value;
                 if (!enquiryId) {
                     if (document.getElementById('customer_name')) document.getElementById('customer_name').value = '';
@@ -112,6 +124,10 @@ window.Quotation = (function () {
                     })
                     .catch(() => console.error('Failed to fetch enquiry details'));
             });
+
+            if (enquirySelect.value) {
+                $(enquirySelect).trigger('change');
+            }
         }
 
         // Add first item on load
@@ -128,6 +144,7 @@ window.Quotation = (function () {
 
         // Summernote Initialization for Terms Content
         initEditor('#terms_content');
+        initEditor('#methodology_content');
 
         // Terms Selection Change
         const termsSelect = document.getElementById('terms_condition_id');
@@ -148,6 +165,28 @@ window.Quotation = (function () {
                         }
                     })
                     .catch(e => console.error('Failed to fetch terms', e));
+            });
+        }
+
+        // Methodology Selection Change
+        const methodologySelect = document.getElementById('methodology_id');
+        if (methodologySelect) {
+            methodologySelect.addEventListener('change', function () {
+                const id = this.value;
+                if (!id) {
+                    $('#methodology_content').summernote('code', '');
+                    return;
+                }
+                fetch(`/methodologies/${id}`, {
+                    headers: { 'Accept': 'application/json' }
+                })
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.data && d.data.content) {
+                            $('#methodology_content').summernote('code', d.data.content);
+                        }
+                    })
+                    .catch(e => console.error('Failed to fetch methodology', e));
             });
         }
 
@@ -181,6 +220,21 @@ window.Quotation = (function () {
                     termsContent = ta ? ta.value : '';
                 }
 
+                let methodologyContent = '';
+                try {
+                    const editorEl = $('#methodology_content');
+                    if (editorEl.length && editorEl.data('summernote')) {
+                        methodologyContent = editorEl.summernote('code');
+                    } else {
+                        const tb = document.getElementById('methodology_content');
+                        methodologyContent = tb ? tb.value : '';
+                    }
+                } catch (se) {
+                    console.warn('Summernote sync failed', se);
+                    const tb = document.getElementById('methodology_content');
+                    methodologyContent = tb ? tb.value : '';
+                }
+
                 const fd = new FormData(form);
                 const data = {};
                 fd.forEach((value, key) => {
@@ -194,7 +248,7 @@ window.Quotation = (function () {
                             if (!data[arrayName][index]) data[arrayName][index] = {};
                             data[arrayName][index][fieldName] = value;
                         }
-                    } else if (key === 'terms_content' || key === '_token') {
+                    } else if (key === 'terms_content' || key === 'methodology_content' || key === '_token') {
                         // handled separately
                     } else {
                         data[key] = value;
@@ -207,6 +261,7 @@ window.Quotation = (function () {
                 }
 
                 data.terms_content = termsContent;
+                data.methodology_content = methodologyContent;
 
                 console.log('Submitting Quotation Data:', data);
 
@@ -282,6 +337,19 @@ window.Quotation = (function () {
             return;
         }
 
+        // Initialize Select2 for Enquiry
+        $('#enquiry_id').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Select Enquiry',
+            allowClear: true
+        });
+
+        // Initialize Select2 for Company
+        $('#company_id').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Select Company'
+        });
+
         // Initialize existing items
         itemIndex = document.querySelectorAll('.item-row').length;
 
@@ -299,6 +367,7 @@ window.Quotation = (function () {
 
         // Summernote Initialization for Terms Content
         initEditor('#terms_content');
+        initEditor('#methodology_content');
 
         // Terms Selection Change
         const termsSelect = document.getElementById('terms_condition_id');
@@ -319,6 +388,28 @@ window.Quotation = (function () {
                         }
                     })
                     .catch(e => console.error('Failed to fetch terms', e));
+            });
+        }
+
+        // Methodology Selection Change
+        const methodologySelect = document.getElementById('methodology_id');
+        if (methodologySelect) {
+            methodologySelect.addEventListener('change', function () {
+                const id = this.value;
+                if (!id) {
+                    $('#methodology_content').summernote('code', '');
+                    return;
+                }
+                fetch(`/methodologies/${id}`, {
+                    headers: { 'Accept': 'application/json' }
+                })
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.data && d.data.content) {
+                            $('#methodology_content').summernote('code', d.data.content);
+                        }
+                    })
+                    .catch(e => console.error('Failed to fetch methodology', e));
             });
         }
 
@@ -352,6 +443,21 @@ window.Quotation = (function () {
                     termsContent = ta ? ta.value : '';
                 }
 
+                let methodologyContent = '';
+                try {
+                    const editorEl = $('#methodology_content');
+                    if (editorEl.length && editorEl.data('summernote')) {
+                        methodologyContent = editorEl.summernote('code');
+                    } else {
+                        const tb = document.getElementById('methodology_content');
+                        methodologyContent = tb ? tb.value : '';
+                    }
+                } catch (se) {
+                    console.warn('Summernote sync failed', se);
+                    const tb = document.getElementById('methodology_content');
+                    methodologyContent = tb ? tb.value : '';
+                }
+
                 const fd = new FormData(form);
                 const data = {};
                 fd.forEach((value, key) => {
@@ -365,7 +471,7 @@ window.Quotation = (function () {
                             if (!data[arrayName][index]) data[arrayName][index] = {};
                             data[arrayName][index][fieldName] = value;
                         }
-                    } else if (key === 'terms_content' || key === '_token') {
+                    } else if (key === 'terms_content' || key === 'methodology_content' || key === '_token') {
                         // handled separately
                     } else {
                         data[key] = value;
@@ -378,6 +484,7 @@ window.Quotation = (function () {
                 }
 
                 data.terms_content = termsContent;
+                data.methodology_content = methodologyContent;
 
                 const token = typeof window.getCsrfToken === 'function' ? window.getCsrfToken() : '';
 
@@ -489,8 +596,8 @@ window.Quotation = (function () {
         const manualItemInput = mainRow.querySelector('.manual-item-input');
 
         if (manualToggle) {
-            manualToggle.addEventListener('change', function () {
-                if (this.checked) {
+            const syncManualState = () => {
+                if (manualToggle.checked) {
                     serviceSelect.classList.add('d-none');
                     serviceSelect.removeAttribute('required');
                     manualServiceInput.classList.remove('d-none');
@@ -499,7 +606,7 @@ window.Quotation = (function () {
                     itemSelect.classList.add('d-none');
                     itemSelect.removeAttribute('required');
                     manualItemInput.classList.remove('d-none');
-                    manualItemInput.setAttribute('required', 'required');
+                    // manualItemInput.setAttribute('required', 'required'); // Made optional as per request
                 } else {
                     serviceSelect.classList.remove('d-none');
                     serviceSelect.setAttribute('required', 'required');
@@ -511,7 +618,10 @@ window.Quotation = (function () {
                     manualItemInput.classList.add('d-none');
                     manualItemInput.removeAttribute('required');
                 }
-            });
+            };
+
+            manualToggle.addEventListener('change', syncManualState);
+            syncManualState();
         }
 
         // Service change -> load items
@@ -554,7 +664,24 @@ window.Quotation = (function () {
             itemSelect.addEventListener('change', function () {
                 const selected = this.options[this.selectedIndex];
                 if (selected && selected.dataset) {
-                    if (unitInput) unitInput.value = selected.dataset.unit || '';
+                    if (unitInput) {
+                        let unitToSet = selected.dataset.unit || '';
+                        if (unitToSet) {
+                            let matchFound = false;
+                            for (let i = 0; i < unitInput.options.length; i++) {
+                                if (unitInput.options[i].value.toLowerCase() === unitToSet.toLowerCase()) {
+                                    unitInput.value = unitInput.options[i].value;
+                                    matchFound = true;
+                                    break;
+                                }
+                            }
+                            if (!matchFound) {
+                                unitInput.value = unitToSet;
+                            }
+                        } else {
+                            unitInput.value = '';
+                        }
+                    }
                     if (descInput && !descInput.value) descInput.value = selected.dataset.description || '';
                     if (gstInput) gstInput.value = selected.dataset.gst || 18;
                     const baseCostInput = mainRow.querySelector('.base-cost-input');
@@ -648,14 +775,18 @@ window.Quotation = (function () {
             gstTotal += itemGst;
         });
 
-        const grandTotal = subtotal + gstTotal;
+        const totalBeforeRounding = subtotal + gstTotal;
+        const grandTotal = Math.round(totalBeforeRounding);
+        const roundOff = grandTotal - totalBeforeRounding;
 
         const subtotalDisplay = document.getElementById('subtotal-display');
         const gstTotalDisplay = document.getElementById('gst-total-display');
+        const roundOffDisplay = document.getElementById('round-off-display');
         const grandTotalDisplay = document.getElementById('grand-total-display');
 
         if (subtotalDisplay) subtotalDisplay.textContent = '₹ ' + subtotal.toFixed(2);
         if (gstTotalDisplay) gstTotalDisplay.textContent = '₹ ' + gstTotal.toFixed(2);
+        if (roundOffDisplay) roundOffDisplay.textContent = '₹ ' + roundOff.toFixed(2);
         if (grandTotalDisplay) grandTotalDisplay.textContent = '₹ ' + grandTotal.toFixed(2);
     }
 
@@ -709,6 +840,11 @@ window.Quotation = (function () {
                         ['table', ['table']],
                         ['insert', ['link']],
                         ['view', ['fullscreen', 'codeview', 'help']]
+                    ],
+                    styleTags: [
+                        'p',
+                        { title: 'No Spacing', tag: 'div', className: '', value: 'div' },
+                        'h4', 'h5', 'h6'
                     ],
                     callbacks: {
                         onInit: function () {

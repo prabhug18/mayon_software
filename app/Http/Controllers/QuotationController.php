@@ -8,9 +8,11 @@ use App\Models\Company;
 use App\Models\Service;
 use App\Models\ServiceItem;
 use App\Models\TermsCondition;
+use App\Models\Methodology;
 use App\Models\Vendor;
 use App\Models\QuotationItem;
 use App\Models\QuotationVendorCost;
+use App\Models\Unit;
 use App\Services\QuotationCalculator;
 use Illuminate\Http\Request;
 use App\Traits\APIResponse;
@@ -57,7 +59,9 @@ class QuotationController extends Controller
             ->get()
             ->groupBy('category');
         $termsConditions = TermsCondition::where('is_active', true)->orderBy('title')->get();
+        $methodologies = Methodology::where('is_active', true)->orderBy('title')->get();
         $vendors = Vendor::where('is_active', true)->orderBy('name')->get();
+        $units = Unit::orderBy('name')->get();
 
         return view('quotations.create', compact(
             'heading',
@@ -66,7 +70,9 @@ class QuotationController extends Controller
             'enquiries',
             'services',
             'termsConditions',
-            'vendors'
+            'methodologies',
+            'vendors',
+            'units'
         ));
     }
 
@@ -81,9 +87,12 @@ class QuotationController extends Controller
             'quotation_type' => 'required|in:OWN,THIRD_PARTY,MIXED',
             'terms_condition_id' => 'nullable|exists:terms_conditions,id',
             'terms_content' => 'nullable|string',
+            'methodology_id' => 'nullable|exists:methodologies,id',
+            'methodology_content' => 'nullable|string',
             'customer_name' => 'nullable|string|max:255',
             'customer_address' => 'nullable|string',
             'kind_att' => 'nullable|string|max:255',
+            'subject' => 'nullable|string|max:255',
             'status' => 'nullable|in:DRAFT,SENT,APPROVED,REVISED',
             'items' => 'required|array|min:1',
             'items.*.service_id' => 'nullable|exists:services,id',
@@ -91,7 +100,7 @@ class QuotationController extends Controller
             'items.*.manual_service_name' => 'nullable|string|max:255',
             'items.*.manual_item_name' => 'nullable|string|max:255',
             'items.*.description' => 'nullable|string',
-            'items.*.unit' => 'required|in:SQM,RMT,SFT,NOS,LS',
+            'items.*.unit' => 'required|exists:units,name',
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.base_cost' => 'nullable|numeric|min:0',
             'items.*.margin_type' => 'required|in:PERCENTAGE,FIXED',
@@ -116,9 +125,12 @@ class QuotationController extends Controller
                 'quotation_type',
                 'terms_condition_id',
                 'terms_content',
+                'methodology_id',
+                'methodology_content',
                 'customer_name',
                 'customer_address',
                 'kind_att',
+                'subject',
                 'status'
             ]);
             
@@ -188,6 +200,7 @@ class QuotationController extends Controller
             'enquiry',
             'company',
             'termsCondition',
+            'methodology',
             'items.service',
             'items.serviceItem',
             'items.vendorCost.vendor',
@@ -212,7 +225,9 @@ class QuotationController extends Controller
             ->get()
             ->groupBy('category');
         $termsConditions = TermsCondition::where('is_active', true)->orderBy('title')->get();
+        $methodologies = Methodology::where('is_active', true)->orderBy('title')->get();
         $vendors = Vendor::where('is_active', true)->orderBy('name')->get();
+        $units = Unit::orderBy('name')->get();
 
         return view('quotations.edit', compact(
             'heading',
@@ -221,7 +236,9 @@ class QuotationController extends Controller
             'enquiries',
             'services',
             'termsConditions',
-            'vendors'
+            'methodologies',
+            'vendors',
+            'units'
         ));
     }
 
@@ -238,9 +255,12 @@ class QuotationController extends Controller
             'quotation_type' => 'required|in:OWN,THIRD_PARTY,MIXED',
             'terms_condition_id' => 'nullable|exists:terms_conditions,id',
             'terms_content' => 'nullable|string',
+            'methodology_id' => 'nullable|exists:methodologies,id',
+            'methodology_content' => 'nullable|string',
             'customer_name' => 'nullable|string|max:255',
             'customer_address' => 'nullable|string',
             'kind_att' => 'nullable|string|max:255',
+            'subject' => 'nullable|string|max:255',
             'status' => 'nullable|in:DRAFT,SENT,APPROVED,REVISED',
             'items' => 'required|array|min:1',
             'items.*.service_id' => 'nullable|exists:services,id',
@@ -248,7 +268,7 @@ class QuotationController extends Controller
             'items.*.manual_service_name' => 'nullable|string|max:255',
             'items.*.manual_item_name' => 'nullable|string|max:255',
             'items.*.description' => 'nullable|string',
-            'items.*.unit' => 'required|in:SQM,RMT,SFT,NOS,LS',
+            'items.*.unit' => 'required|exists:units,name',
             'items.*.quantity' => 'required|numeric|min:0.01',
             'items.*.base_cost' => 'nullable|numeric|min:0',
             'items.*.margin_type' => 'required|in:PERCENTAGE,FIXED',
@@ -274,9 +294,12 @@ class QuotationController extends Controller
                 'quotation_type',
                 'terms_condition_id',
                 'terms_content',
+                'methodology_id',
+                'methodology_content',
                 'customer_name',
                 'customer_address',
                 'kind_att',
+                'subject',
                 'status'
             ]);
 
@@ -424,6 +447,7 @@ class QuotationController extends Controller
             'enquiry',
             'company',
             'termsCondition',
+            'methodology',
             'items.service',
             'items.serviceItem',
             'createdBy'
@@ -439,50 +463,43 @@ class QuotationController extends Controller
         ]);
 
         $filename = ($quotation->quotation_no ?: 'quotation-') . '.pdf';
+        $filename = str_replace(['/', '\\'], '_', $filename);
         return $pdf->download($filename);
     }
 
-    /**
-     * Generate quotation number using company prefix + FY + sequence
-     */
     private function generateQuotationNumber($companyId)
     {
         $company = Company::find($companyId);
         $prefix = ($company && $company->quotation_prefix) ? $company->quotation_prefix : 'QT-';
+        $startNumber = ($company && $company->quotation_start_number) ? $company->quotation_start_number : 1;
 
-        // Determine financial year code
-        $now = now();
-        $yearStart = $now->month >= 4 ? $now->year : $now->year - 1;
-        $fySuffix = substr((string)$yearStart, 2, 2) . substr((string)($yearStart + 1), 2, 2);
-
-        // Find last quotation for this company in this FY
-        $like = $prefix . $fySuffix . '%';
+        // Find last quotation for this company starting with this prefix
         $last = Quotation::where('company_id', $companyId)
-            ->where('quotation_no', 'like', $like)
+            ->where('quotation_no', 'like', $prefix . '%')
             ->orderBy('id', 'desc')
             ->first();
 
-        $nextSeq = 1;
+        $nextSeq = $startNumber;
+
         if ($last) {
-            $base = $prefix . $fySuffix;
-            if (strpos($last->quotation_no, $base) === 0) {
-                $suffixPart = substr($last->quotation_no, strlen($base));
-                if (preg_match('/^0*(\d+)$/', $suffixPart, $mm)) {
-                    $nextSeq = intval($mm[1]) + 1;
-                }
+            // Extract the numeric part after the prefix
+            $suffixPart = substr($last->quotation_no, strlen($prefix));
+            if (preg_match('/^(\d+)$/', $suffixPart, $matches)) {
+                $lastNumber = intval($matches[1]);
+                $nextSeq = max($startNumber, $lastNumber + 1);
             }
         }
 
+        // Format with leading zeros (optional, but let's keep it consistent if it's a simple number)
+        // If the start number is large (e.g. 1001), padding to 2 digits won't change it.
         $seqStr = str_pad($nextSeq, 2, '0', STR_PAD_LEFT);
-        $generated = $prefix . $fySuffix . $seqStr;
+        $generated = $prefix . $seqStr;
 
         // Ensure uniqueness
-        $tries = 0;
-        while (Quotation::where('quotation_no', $generated)->exists() && $tries < 5) {
-            $tries++;
+        while (Quotation::where('quotation_no', $generated)->exists()) {
             $nextSeq++;
             $seqStr = str_pad($nextSeq, 2, '0', STR_PAD_LEFT);
-            $generated = $prefix . $fySuffix . $seqStr;
+            $generated = $prefix . $seqStr;
         }
 
         return $generated;

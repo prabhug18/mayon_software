@@ -35,7 +35,7 @@
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Quotation Number <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="quotation_no" name="quotation_no" value="{{ $quotation->quotation_no }}" required style="background-color: #f8f9fa; border: 1px dashed #dee2e6;" />
+                        <input type="text" class="form-control" id="quotation_no" name="quotation_no" value="{{ $quotation->quotation_no }}" readonly required style="background-color: #f8f9fa; border: 1px dashed #dee2e6;" />
                         <div class="invalid-feedback" id="quotation_no-error"></div>
                     </div>
                     <div class="col-md-4 mb-3">
@@ -85,6 +85,13 @@
                             <option value="MIXED" {{ $quotation->quotation_type == 'MIXED' ? 'selected' : '' }}>Mixed</option>
                         </select>
                         <div class="invalid-feedback" id="quotation_type-error"></div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label">Subject</label>
+                        <input type="text" class="form-control custom-input" id="subject" name="subject" value="{{ $quotation->subject }}" placeholder="Enter Subject (e.g. Quotation for Epoxy Flooring)" />
+                        <div class="invalid-feedback" id="subject-error"></div>
                     </div>
                 </div>
             </div>
@@ -137,22 +144,21 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <select class="form-select form-select-sm service-item-select {{ $item->manual_item_name ? 'd-none' : '' }}" name="items[{{ $index }}][service_item_id]" {{ $item->manual_item_name ? '' : 'required' }}>
+                                    <select class="form-select form-select-sm service-item-select {{ $item->manual_service_name ? 'd-none' : '' }}" name="items[{{ $index }}][service_item_id]" {{ $item->manual_service_name ? '' : 'required' }}>
                                         @if($item->service_item_id)
                                             <option value="{{ $item->service_item_id }}">{{ $item->serviceItem->item_name }}</option>
                                         @else
                                             <option value="">Select Item</option>
                                         @endif
                                     </select>
-                                    <input type="text" class="form-control form-control-sm manual-item-input {{ $item->manual_item_name ? '' : 'd-none' }}" name="items[{{ $index }}][manual_item_name]" value="{{ $item->manual_item_name }}" placeholder="Manual Item" />
+                                    <input type="text" class="form-control form-control-sm manual-item-input {{ $item->manual_service_name ? '' : 'd-none' }}" name="items[{{ $index }}][manual_item_name]" value="{{ $item->manual_item_name }}" placeholder="Manual Item" />
                                 </td>
                                 <td>
                                     <select class="form-select form-select-sm unit-input" name="items[{{ $index }}][unit]" required>
-                                        <option value="SQM" {{ $item->unit == 'SQM' ? 'selected' : '' }}>SQM</option>
-                                        <option value="RMT" {{ $item->unit == 'RMT' ? 'selected' : '' }}>RMT</option>
-                                        <option value="SFT" {{ $item->unit == 'SFT' ? 'selected' : '' }}>SFT</option>
-                                        <option value="NOS" {{ $item->unit == 'NOS' ? 'selected' : '' }}>NOS</option>
-                                        <option value="LS" {{ $item->unit == 'LS' ? 'selected' : '' }}>LS</option>
+                                        <option value="">Select Unit</option>
+                                        @foreach($units as $unit)
+                                            <option value="{{ $unit->name }}" {{ $item->unit == $unit->name ? 'selected' : '' }}>{{ $unit->name }}</option>
+                                        @endforeach
                                     </select>
                                 </td>
                                 <td>
@@ -215,6 +221,10 @@
                                     <span class="text-muted">GST Total:</span>
                                     <span id="gst-total-display" class="fw-bold">₹ {{ number_format($quotation->gst_total, 2) }}</span>
                                 </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Round Off:</span>
+                                    <span id="round-off-display" class="fw-bold">₹ 0.00</span>
+                                </div>
                                 <hr>
                                 <div class="d-flex justify-content-between">
                                     <span class="h6 mb-0 fw-bold">Grand Total:</span>
@@ -244,6 +254,18 @@
                         <div class="invalid-feedback" id="terms_condition_id-error"></div>
                     </div>
                     <div class="col-md-6 mb-3">
+                        <label class="form-label">Methodology</label>
+                        <select class="form-select custom-input" id="methodology_id" name="methodology_id">
+                            <option value="">Select Methodology</option>
+                            @foreach($methodologies as $el)
+                                <option value="{{ $el->id }}" {{ $quotation->methodology_id == $el->id ? 'selected' : '' }}>
+                                    {{ $el->title }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="invalid-feedback" id="methodology_id-error"></div>
+                    </div>
+                    <div class="col-md-6 mb-3">
                         <label class="form-label">Status</label>
                         <select class="form-select custom-input" id="status" name="status">
                             <option value="DRAFT" {{ $quotation->status == 'DRAFT' ? 'selected' : '' }}>Draft</option>
@@ -259,6 +281,14 @@
                         <textarea id="terms_content" name="terms_content" class="form-control">{{ $quotation->terms_content }}</textarea>
                         <div class="invalid-feedback" id="terms_content-error"></div>
                         <small class="text-muted">Select a template above to load its content, then customize it for this quotation.</small>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <label class="form-label">Editable Methodology Content</label>
+                        <textarea id="methodology_content" name="methodology_content" class="form-control">{{ $quotation->methodology_content }}</textarea>
+                        <div class="invalid-feedback" id="methodology_content-error"></div>
+                        <small class="text-muted">Select a methodology template above to load its content, then customize it for this quotation.</small>
                     </div>
                 </div>
             </div>
@@ -303,11 +333,10 @@
         </td>
         <td>
             <select class="form-select form-select-sm unit-input" name="items[INDEX][unit]" required>
-                <option value="SQM">SQM</option>
-                <option value="RMT">RMT</option>
-                <option value="SFT">SFT</option>
-                <option value="NOS">NOS</option>
-                <option value="LS">LS</option>
+                <option value="">Select Unit</option>
+                @foreach($units as $unit)
+                    <option value="{{ $unit->name }}">{{ $unit->name }}</option>
+                @endforeach
             </select>
         </td>
         <td>

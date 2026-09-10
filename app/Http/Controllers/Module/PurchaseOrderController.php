@@ -80,59 +80,35 @@ class PurchaseOrderController extends Controller
     $data = $request->only(['po_number','po_date','company_id','supplier_id','project_id','site_engineer_id','amount','status','notes']);
         $data['created_by'] = auth()->id();
 
-        // If po_number not supplied, generate using company->po_prefix + financial year code + sequence per company
+        // If po_number not supplied, generate using company->po_prefix + sequence
         if (empty($data['po_number'])) {
             try {
                 $company = \App\Models\Company::find($data['company_id']);
                 $prefix = ($company && $company->po_prefix) ? $company->po_prefix : 'PO-';
+                $startNumber = ($company && $company->po_start_number) ? $company->po_start_number : 1;
 
-                // Determine financial year code, e.g., 2025-2026 -> '2526'
-                $now = now();
-                $yearStart = $now->month >= 4 ? $now->year : $now->year - 1; // FY starts Apr
-                $fySuffix = substr((string)$yearStart, 2, 2) . substr((string)($yearStart + 1), 2, 2);
-
-                // Find last PO for this company in this FY (matching prefix+fySuffix)
-                $like = $prefix . $fySuffix . '%';
+                // Find last PO for this company matching this prefix
                 $last = PurchaseOrder::where('company_id', $data['company_id'])
-                        ->where('po_number', 'like', $like)
+                        ->where('po_number', 'like', $prefix . '%')
                         ->orderBy('id', 'desc')
                         ->first();
 
-                $nextSeq = 1;
+                $nextSeq = $startNumber;
                 if ($last) {
-                    // attempt to strip the known prefix + fySuffix and parse only the sequence portion
-                    $base = $prefix . $fySuffix;
-                    $suffixPart = '';
-                    if (strpos($last->po_number, $base) === 0) {
-                        $suffixPart = substr($last->po_number, strlen($base));
-                        if (preg_match('/^0*(\d+)$/', $suffixPart, $mm)) {
-                            $nextSeq = intval($mm[1]) + 1;
-                        } else {
-                            // fallback to trailing digits
-                            if (preg_match('/(\d+)$/', $last->po_number, $mm2)) {
-                                $nextSeq = intval($mm2[1]) + 1;
-                            }
-                        }
-                    } else {
-                        // last PO didn't start with expected base; fallback to trailing digits
-                        if (preg_match('/(\d+)$/', $last->po_number, $mm2)) {
-                            $nextSeq = intval($mm2[1]) + 1;
-                        }
+                    $suffixPart = substr($last->po_number, strlen($prefix));
+                    if (preg_match('/^(\d+)$/', $suffixPart, $matches)) {
+                        $lastNumber = intval($matches[1]);
+                        $nextSeq = max($startNumber, $lastNumber + 1);
                     }
                 }
-                // use minimum 2-digit padding for sequence (01,02,...,99,100,101...)
+                
                 $seqStr = str_pad($nextSeq, 2, '0', STR_PAD_LEFT);
-                // concatenate without a slash as requested
-                $generated = $prefix . $fySuffix . $seqStr;
+                $generated = $prefix . $seqStr;
 
-                // ensure uniqueness (small retry loop)
-                $tries = 0;
-                while (PurchaseOrder::where('po_number', $generated)->exists() && $tries < 5) {
-                    $tries++;
+                while (PurchaseOrder::where('po_number', $generated)->exists()) {
                     $nextSeq++;
                     $seqStr = str_pad($nextSeq, 2, '0', STR_PAD_LEFT);
-                    // concatenate without a slash as requested
-                    $generated = $prefix . $fySuffix . $seqStr;
+                    $generated = $prefix . $seqStr;
                 }
                 $data['po_number'] = $generated;
             } catch (\Exception $e) {
@@ -267,40 +243,32 @@ class PurchaseOrderController extends Controller
         if (! $companyId) return response()->json(['status'=>'error','message'=>'company_id required'], 400);
         $company = \App\Models\Company::find($companyId);
         $prefix = ($company && $company->po_prefix) ? $company->po_prefix : 'PO-';
+        $startNumber = ($company && $company->po_start_number) ? $company->po_start_number : 1;
 
-        $now = now();
-        $yearStart = $now->month >= 4 ? $now->year : $now->year - 1;
-        $fySuffix = substr((string)$yearStart, 2, 2) . substr((string)($yearStart + 1), 2, 2);
-
-        $like = $prefix . $fySuffix . '%';
+        // Find last PO for this company matching this prefix
         $last = PurchaseOrder::where('company_id', $companyId)
-                ->where('po_number', 'like', $like)
+                ->where('po_number', 'like', $prefix . '%')
                 ->orderBy('id', 'desc')
                 ->first();
 
-        $nextSeq = 1;
+        $nextSeq = $startNumber;
         if ($last) {
-            $base = $prefix . $fySuffix;
-            $suffixPart = '';
-            if (strpos($last->po_number, $base) === 0) {
-                $suffixPart = substr($last->po_number, strlen($base));
-                if (preg_match('/^0*(\d+)$/', $suffixPart, $mm)) {
-                    $nextSeq = intval($mm[1]) + 1;
-                } else {
-                    if (preg_match('/(\d+)$/', $last->po_number, $mm2)) {
-                        $nextSeq = intval($mm2[1]) + 1;
-                    }
-                }
-            } else {
-                if (preg_match('/(\d+)$/', $last->po_number, $mm2)) {
-                    $nextSeq = intval($mm2[1]) + 1;
-                }
+            $suffixPart = substr($last->po_number, strlen($prefix));
+            if (preg_match('/^(\d+)$/', $suffixPart, $matches)) {
+                $lastNumber = intval($matches[1]);
+                $nextSeq = max($startNumber, $lastNumber + 1);
             }
         }
-        // minimum 2-digit padding (01,02,...)
+        
         $seqStr = str_pad($nextSeq, 2, '0', STR_PAD_LEFT);
-        // concatenate without a slash to match requested format e.g. Ko252601
-        $generated = $prefix . $fySuffix . $seqStr;
+        $generated = $prefix . $seqStr;
+
+        while (PurchaseOrder::where('po_number', $generated)->exists()) {
+            $nextSeq++;
+            $seqStr = str_pad($nextSeq, 2, '0', STR_PAD_LEFT);
+            $generated = $prefix . $seqStr;
+        }
+
         return $this->success(['po_number' => $generated]);
     }
 
@@ -334,7 +302,9 @@ class PurchaseOrderController extends Controller
                 Log::info('Puppeteer render attempted', ['cmd' => $cmd, 'return' => $returnVar, 'output' => $output]);
 
                 if ($returnVar === 0 && file_exists($tmp)) {
-                    return response()->download($tmp, ($po->po_number ?: 'purchase-order-') . '.pdf')->deleteFileAfterSend(true);
+                    $filename = ($po->po_number ?: 'purchase-order-') . '.pdf';
+                    $filename = str_replace(['/', '\\'], '_', $filename);
+                    return response()->download($tmp, $filename)->deleteFileAfterSend(true);
                 }
                 // else fall through to dompdf
             } else {
@@ -355,6 +325,7 @@ class PurchaseOrderController extends Controller
         ]);
 
         $filename = ($po->po_number ?: 'purchase-order-') . '.pdf';
+        $filename = str_replace(['/', '\\'], '_', $filename);
         return $pdf->download($filename);
     }
 

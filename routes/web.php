@@ -80,11 +80,23 @@ Route::middleware('auth')->group(function () {
         Route::resource('services', App\Http\Controllers\ServiceController::class);
         Route::resource('service-items', App\Http\Controllers\ServiceItemController::class);
         Route::resource('terms-conditions', App\Http\Controllers\TermsConditionController::class);
+        Route::resource('methodologies', App\Http\Controllers\MethodologyController::class);
         Route::resource('vendors', App\Http\Controllers\VendorController::class);
     });
 
     // Enquiry Management
     Route::middleware(['permission:view enquiries'])->group(function () {
+        // Excel & CSV Lead Import (Dedicated)
+        Route::get('enquiries/excel-import', [App\Http\Controllers\ExcelLeadImportController::class, 'showImportForm'])->name('enquiries.excel.import');
+        Route::get('enquiries/excel-import/sample-template', [App\Http\Controllers\ExcelLeadImportController::class, 'downloadSampleTemplate'])->name('enquiries.excel.sampleTemplate');
+        Route::post('enquiries/excel-import/preview', [App\Http\Controllers\ExcelLeadImportController::class, 'preview'])->name('enquiries.excel.preview');
+        Route::post('enquiries/excel-import/process', [App\Http\Controllers\ExcelLeadImportController::class, 'import'])->name('enquiries.excel.process');
+
+        // Facebook Leads Import (Existing)
+        Route::get('enquiries/import', [App\Http\Controllers\FacebookLeadImportController::class, 'showImportForm'])->name('enquiries.import');
+        Route::post('enquiries/import/preview', [App\Http\Controllers\FacebookLeadImportController::class, 'preview'])->name('enquiries.import.preview');
+        Route::post('enquiries/import/process', [App\Http\Controllers\FacebookLeadImportController::class, 'import'])->name('enquiries.import.process');
+
         Route::resource('enquiries', App\Http\Controllers\EnquiryController::class);
         Route::post('enquiries/check-name', [App\Http\Controllers\EnquiryController::class, 'checkName'])->name('enquiries.checkName');
         Route::post('enquiries/{id}/comments', [App\Http\Controllers\EnquiryController::class, 'storeComment'])->name('enquiries.comments.store');
@@ -112,7 +124,10 @@ Route::middleware('auth')->group(function () {
         Route::resource('purchaseOrders', App\Http\Controllers\Module\PurchaseOrderController::class);
     });
 
-    // Dashboard follow-ups JSON (today)
+    // Dashboard AJAX routes for Modals
+    Route::get('dashboard/enquiries/modal', [GeneralController::class, 'enquiriesList'])->name('dashboard.enquiries.modal');
+    Route::get('dashboard/quotations/modal', [GeneralController::class, 'quotationsList'])->name('dashboard.quotations.modal');
+    Route::get('dashboard/purchase-orders/modal', [GeneralController::class, 'purchaseOrdersList'])->name('dashboard.purchaseOrders.modal');
     Route::get('dashboard/followups/today', [GeneralController::class, 'todayFollowUps'])->name('dashboard.followups.today');
 });
 

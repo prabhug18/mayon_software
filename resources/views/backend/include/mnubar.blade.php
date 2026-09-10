@@ -69,10 +69,12 @@
           </a>
           <ul class="submenu">
               <li><a href="{{ route('enquiry-types.index') }}"><i class="fas fa-tags"></i><span> Enquiry Type</span></a></li>
+              <li><a href="{{ route('projects.index') }}"><i class="fas fa-project-diagram"></i><span> Project</span></a></li>
               <li><a href="{{ route('companies.index') }}"><i class="fas fa-building"></i><span> Company</span></a></li>
               <li><a href="{{ route('services.index') }}"><i class="fas fa-concierge-bell"></i><span> Services</span></a></li>
               <li><a href="{{ route('service-items.index') }}"><i class="fas fa-list-ul"></i><span> Service Items</span></a></li>
               <li><a href="{{ route('terms-conditions.index') }}"><i class="fas fa-file-contract"></i><span> Terms & Conditions</span></a></li>
+              <li><a href="{{ route('methodologies.index') }}"><i class="fas fa-check-square"></i><span> Methodology</span></a></li>
               <li><a href="{{ route('vendors.index') }}"><i class="fas fa-handshake"></i><span> Vendors</span></a></li>
               <li><a href="{{ route('units.index') }}"><i class="fas fa-database"></i><span> Unit</span></a></li>
               <li><a href="{{ route('sources.index') }}"><i class="fas fa-database"></i><span> Source</span></a></li>

@@ -2,6 +2,8 @@
 
 @section('title','Purchase Order Details')
 
+@php $fmt = fn($v) => number_format((float)$v, 2); @endphp
+
 @section('content')
 <!-- top spacer to add clear space above the PO content -->
 
@@ -37,9 +39,9 @@
 
                 <div class="row g-4 mt-2">
                     <div class="col-md-7">
-                        <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex flex-column align-items-start gap-3">
                             @if(optional($po->company)->logo)
-                                <img src="{{ asset(optional($po->company)->logo) }}" alt="{{ $po->company->name }}" style="height:64px; width:auto; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08)">
+                                <img src="{{ asset(optional($po->company)->logo) }}" alt="{{ $po->company->name }}" style="max-height:80px; width:auto; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.05)">
                             @else
                                 <div class="bg-primary bg-opacity-10 text-primary rounded-4 d-flex align-items-center justify-content-center fw-bold fs-4" style="height:64px;width:64px;">
                                     {{ strtoupper(substr(optional($po->company)->name ?? 'CO',0,2)) }}
@@ -105,6 +107,10 @@
                             <h6 class="fw-bold mb-0 text-uppercase tracking-wider">Deliver To / Project</h6>
                         </div>
                         <h5 class="fw-bold mb-2">{{ optional($po->project)->name ?? '-' }}</h5>
+                        @php
+                            $proj = $po->project ?? null;
+                            $projAddr = $proj ? ($proj->address ?? $proj->location ?? '-') : '-';
+                        @endphp
                         <div class="text-muted mb-3">{!! nl2br(e($projAddr)) !!}</div>
                         <div class="small">
                             <div class="mb-1"><span class="text-muted">Site Engineer:</span> {{ optional($po->siteEngineer)->name ?? '-' }}</div>

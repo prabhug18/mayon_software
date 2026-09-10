@@ -113,6 +113,27 @@
                     <textarea class="form-control custom-input" id="description" name="description" rows="3" placeholder="Provide more details about the enquiry...">{{ $enquiry->description }}</textarea>
                     <div class="invalid-feedback" id="description-error"></div>
                 </div>
+
+                @if($enquiry->fb_created_at)
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-primary">Facebook Lead Creation Time</label>
+                        <input type="text" class="form-control custom-input bg-light" value="{{ $enquiry->fb_created_at->format('M j, Y H:i') }}" readonly />
+                    </div>
+                    @if($enquiry->fb_timeline)
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-primary">Facebook Timeline Answer</label>
+                        <input type="text" class="form-control custom-input bg-light" value="{{ $enquiry->fb_timeline }}" readonly />
+                    </div>
+                    @endif
+                </div>
+                @elseif($enquiry->fb_timeline)
+                <div class="mb-3">
+                    <label class="form-label text-primary">Facebook Timeline Answer</label>
+                    <input type="text" class="form-control custom-input bg-light" value="{{ $enquiry->fb_timeline }}" readonly />
+                    <div class="form-text text-muted small">This is the original answer provided by the lead on Facebook.</div>
+                </div>
+                @endif
             </div>
 
             <div class="section-style mb-4">

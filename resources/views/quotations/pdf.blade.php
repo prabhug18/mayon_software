@@ -1,5 +1,32 @@
 @php 
-$fmt = fn($v) => number_format((float)$v, 2);
+$fmt = function($v) {
+    $num = number_format((float)$v, 2, '.', '');
+    $exploded = explode('.', $num);
+    $whole = $exploded[0];
+    $decimal = isset($exploded[1]) ? $exploded[1] : '00';
+    
+    $isNegative = false;
+    if (strpos($whole, '-') === 0) {
+        $isNegative = true;
+        $whole = substr($whole, 1);
+    }
+    
+    $len = strlen($whole);
+    if ($len <= 3) {
+        $formatted = $whole;
+    } else {
+        $lastThree = substr($whole, -3);
+        $rest = substr($whole, 0, -3);
+        $restFormatted = '';
+        while (strlen($rest) > 2) {
+            $restFormatted = ',' . substr($rest, -2) . $restFormatted;
+            $rest = substr($rest, 0, -2);
+        }
+        $formatted = $rest . $restFormatted . ',' . $lastThree;
+    }
+    
+    return ($isNegative ? '-' : '') . $formatted . '.' . $decimal;
+};
 
 // Embed company logo
 $companyLogoSrc = null;
@@ -114,8 +141,9 @@ $groupedItems = $quotation->items->groupBy('service_id');
                 <thead>
                     <tr>
                         <th style="width:5%">#</th>
-                        <th style="width:30%">Item</th>
-                        <th style="width:30%">Description</th>
+                        <th style="width:25%">Item</th>
+                        <th style="width:25%">Description</th>
+                        <th style="width:10%">HSN/SAC</th>
                         <th style="width:8%">Unit</th>
                         <th style="width:8%">Qty</th>
                         <th style="width:12%">Rate</th>
@@ -127,8 +155,21 @@ $groupedItems = $quotation->items->groupBy('service_id');
                     @foreach($items as $index => $item)
                     <tr>
                         <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item->serviceItem->item_name }}</td>
+                        <td>
+                            @php
+                                $isManual = is_null($item->service_id);
+                                $svcName = $isManual ? $item->manual_service_name : null;
+                                $itemName = optional($item->serviceItem)->item_name ?? $item->manual_item_name;
+                            @endphp
+                            @if($svcName)
+                                <div style="font-weight:bold; color:#2563EB;">{{ $svcName }}</div>
+                            @endif
+                            @if($itemName)
+                                <div style="font-size:12px; font-weight:bold; color:#1a3a8a; margin-top:2px;">{{ $itemName }}</div>
+                            @endif
+                        </td>
                         <td style="font-size:11px;color:#666">{{ $item->description ?: '-' }}</td>
+                        <td style="font-size:11px">{{ optional($item->serviceItem)->hsn_sac_code ?: '-' }}</td>
                         <td>{{ $item->unit }}</td>
                         <td>{{ $fmt($item->quantity) }}</td>
                         <td>₹ {{ $fmt($item->selling_rate) }}</td>
@@ -155,6 +196,13 @@ $groupedItems = $quotation->items->groupBy('service_id');
                         <tr>
                             <td style="padding:4px 0;font-size:12px">GST Total:</td>
                             <td style="padding:4px 0;text-align:right;font-size:12px">₹ {{ $fmt($quotation->gst_total) }}</td>
+                        </tr>
+                        @php
+                            $roundOff = $quotation->grand_total - ($quotation->subtotal + $quotation->gst_total);
+                        @endphp
+                        <tr>
+                            <td style="padding:4px 0;font-size:12px">Round Off:</td>
+                            <td style="padding:4px 0;text-align:right;font-size:12px">₹ {{ $fmt($roundOff) }}</td>
                         </tr>
                         <tr style="border-top:1px solid rgba(255,255,255,0.3)">
                             <td style="padding:8px 0 4px 0;font-size:14px;font-weight:700">Grand Total:</td>

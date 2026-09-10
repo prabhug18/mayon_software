@@ -10,6 +10,7 @@ use App\Models\PurchaseOrder;
 use App\Models\Enquiry;
 use App\Models\Quotation;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class GeneralController extends Controller
 {
@@ -82,14 +83,67 @@ class GeneralController extends Controller
         // Total quotations
         $quotationCount = Quotation::count();
 
+        // Total Purchase Orders
+        $poCount = PurchaseOrder::count();
+
+        // --- Chart Data ---
+        // 1. Source Breakdown (Doughnut)
+        $sourceData = Enquiry::select('source_id', DB::raw('count(*) as total'))
+            ->groupBy('source_id')
+            ->with('source')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'label' => $item->source ? $item->source->name : 'Unknown',
+                    'data' => $item->total
+                ];
+            });
+
+        // 2. Trend (Last 30 Days) - Enquiries vs Quotations
+        $startDate = $now->copy()->subDays(29)->startOfDay();
+        
+        $enquiriesTrend = Enquiry::select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as total'))
+            ->where('created_at', '>=', $startDate)
+            ->groupBy('date')
+            ->get()
+            ->keyBy('date');
+
+        $quotationsTrend = Quotation::select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as total'))
+            ->where('created_at', '>=', $startDate)
+            ->groupBy('date')
+            ->get()
+            ->keyBy('date');
+
+        $trendDates = [];
+        $trendEnquiries = [];
+        $trendQuotations = [];
+
+        for ($i = 0; $i < 30; $i++) {
+            $dateString = $startDate->copy()->addDays($i)->format('Y-m-d');
+            $trendDates[] = Carbon::parse($dateString)->format('M d');
+            $trendEnquiries[] = isset($enquiriesTrend[$dateString]) ? $enquiriesTrend[$dateString]->total : 0;
+            $trendQuotations[] = isset($quotationsTrend[$dateString]) ? $quotationsTrend[$dateString]->total : 0;
+        }
+
+        $trendData = [
+            'labels' => $trendDates,
+            'enquiries' => $trendEnquiries,
+            'quotations' => $trendQuotations
+        ];
+
+        // Recent snippets for bottom tables
+        $recentEnquiries = Enquiry::with('enquiryType')->orderBy('created_at', 'desc')->take(5)->get();
+        $recentQuotationsList = Quotation::orderBy('created_at', 'desc')->take(5)->get();
+
         return view('backend.general.dashboard', compact(
             'heading',
             'suppliersCount',
             'productsCount',
             'projectsCount',
             'poCurrentMonthCount',
-            'recentPOs'
-            ,'followUps', 'todayFollowUpCount', 'tomorrowFollowUpCount', 'pendingFollowUpCount', 'enquiryCount', 'quotationCount'
+            'recentPOs',
+            'followUps', 'todayFollowUpCount', 'tomorrowFollowUpCount', 'pendingFollowUpCount', 'enquiryCount', 'quotationCount', 'poCount',
+            'sourceData', 'trendData', 'recentEnquiries', 'recentQuotationsList'
         ));
     }
 
@@ -116,6 +170,67 @@ class GeneralController extends Controller
                     'source' => optional($e->source)->name,
                     'next_follow_up_at' => optional($e->next_follow_up_at)->format('Y-m-d H:i:s'),
                     'next_follow_up_human' => optional($e->next_follow_up_at)->format('M j, H:i'),
+                ];
+            });
+
+        return response()->json(['data' => $items]);
+    }
+
+    public function enquiriesList(Request $request)
+    {
+        $items = Enquiry::with('enquiryType', 'source')
+            ->orderBy('created_at', 'desc')
+            ->take(50) // Limit for performance in modal
+            ->get()
+            ->map(function($e){
+                return [
+                    'id' => $e->id,
+                    'name' => $e->name,
+                    'mobile' => $e->mobile,
+                    'enquiry_type' => optional($e->enquiryType)->name,
+                    'status' => $e->status,
+                    'source' => optional($e->source)->name,
+                    'created_at' => optional($e->created_at)->format('M j, Y')
+                ];
+            });
+
+        return response()->json(['data' => $items]);
+    }
+
+    public function quotationsList(Request $request)
+    {
+        $items = Quotation::with('company')
+            ->orderBy('created_at', 'desc')
+            ->take(50)
+            ->get()
+            ->map(function($q){
+                return [
+                    'id' => $q->id,
+                    'quotation_no' => $q->quotation_no,
+                    'customer_name' => $q->customer_name,
+                    'grand_total' => $q->grand_total,
+                    'status' => $q->status,
+                    'created_at' => optional($q->created_at)->format('M j, Y')
+                ];
+            });
+
+        return response()->json(['data' => $items]);
+    }
+
+    public function purchaseOrdersList(Request $request)
+    {
+        $items = PurchaseOrder::with('supplier')
+            ->orderBy('created_at', 'desc')
+            ->take(50)
+            ->get()
+            ->map(function($po){
+                return [
+                    'id' => $po->id,
+                    'po_number' => $po->po_number,
+                    'supplier_name' => optional($po->supplier)->name,
+                    'amount' => $po->amount,
+                    'status' => $po->status,
+                    'po_date' => optional($po->po_date)->format('M j, Y')
                 ];
             });
 

@@ -113,7 +113,7 @@ $(function(){
         const url = id ? `/service-items/${id}` : "{{ route('service-items.store') }}";
         
         fetch(url, {
-            method: id ? 'PUT' : 'POST',
+            method: 'POST',
             body: new FormData(this),
             headers: { 
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'), 

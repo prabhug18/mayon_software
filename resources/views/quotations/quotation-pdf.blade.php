@@ -1,5 +1,32 @@
 @php
-$fmt = fn($v) => number_format((float)$v, 2);
+$fmt = function($v) {
+    $num = number_format((float)$v, 2, '.', '');
+    $exploded = explode('.', $num);
+    $whole = $exploded[0];
+    $decimal = isset($exploded[1]) ? $exploded[1] : '00';
+    
+    $isNegative = false;
+    if (strpos($whole, '-') === 0) {
+        $isNegative = true;
+        $whole = substr($whole, 1);
+    }
+    
+    $len = strlen($whole);
+    if ($len <= 3) {
+        $formatted = $whole;
+    } else {
+        $lastThree = substr($whole, -3);
+        $rest = substr($whole, 0, -3);
+        $restFormatted = '';
+        while (strlen($rest) > 2) {
+            $restFormatted = ',' . substr($rest, -2) . $restFormatted;
+            $rest = substr($rest, 0, -2);
+        }
+        $formatted = $rest . $restFormatted . ',' . $lastThree;
+    }
+    
+    return ($isNegative ? '-' : '') . $formatted . '.' . $decimal;
+};
 
 // Embed company logo as base64
 $companyLogoSrc = null;
@@ -36,7 +63,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         /* ───────── PAGE ───────── */
         @page {
             size: A4 portrait;
-            margin: 20mm 18mm 15mm 18mm;
+            margin: 115px 15mm 15mm 15mm;
         }
 
         body {
@@ -50,14 +77,17 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
 
         /* ───────── HEADER BAND ───────── */
         .header-band {
+            position: fixed;
+            top: -105px;
+            left: 0;
+            right: 0;
             width: 100%;
             border-collapse: collapse;
-            border-bottom: 3px solid {{ $blue }};
-            margin-bottom: 18px;
+            border-bottom: 2px solid {{ $blue }};
         }
         .header-band td {
             vertical-align: middle;
-            padding: 0 0 12px 0;
+            padding: 0 0 4px 0;
         }
         .hdr-logo-cell {
             width: 40%;
@@ -67,28 +97,28 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             text-align: right;
         }
         .logo-img {
-            max-height: 60px;
-            max-width: 200px;
+            max-height: 40px;
+            max-width: 160px;
         }
         .company-name-text {
-            font-size: 20px;
+            font-size: 14px;
             font-weight: bold;
             color: {{ $blue }};
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
         .company-addr {
-            font-size: 8px;
+            font-size: 7px;
             color: {{ $grayText }};
-            line-height: 1.5;
-            margin-top: 3px;
+            line-height: 1.4;
+            margin-top: 2px;
         }
 
         /* ───────── DETAILS GRID ───────── */
         .details-grid {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
+            margin-bottom: 5px;
         }
         .details-grid td {
             vertical-align: top;
@@ -103,10 +133,10 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             color: {{ $blue }};
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
         .to-name {
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
             color: {{ $darkText }};
         }
@@ -114,7 +144,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             font-size: 9px;
             color: {{ $grayText }};
             line-height: 1.5;
-            margin-top: 3px;
+            margin-top: 2px;
         }
 
         .ref-table {
@@ -122,8 +152,8 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             margin-left: auto;
         }
         .ref-table td {
-            padding: 3px 0;
-            font-size: 10px;
+            padding: 2px 0;
+            font-size: 9px;
         }
         .ref-label {
             font-weight: bold;
@@ -138,20 +168,21 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
 
         /* ───────── SUBJECT ───────── */
         .subject-line {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: bold;
             color: {{ $darkText }};
-            margin-bottom: 18px;
-            padding: 8px 12px;
+            margin-bottom: 6px;
+            padding: 4px 8px;
             background: {{ $lightBlue }};
-            border-left: 4px solid {{ $blue }};
+            border-left: 3px solid {{ $blue }};
         }
 
         /* ───────── ITEMS TABLE ───────── */
         .items-tbl {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
+            page-break-inside: auto;
         }
         .items-tbl th {
             background: {{ $blue }};
@@ -165,9 +196,15 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         }
         .items-tbl td {
             border: 1px solid #bfcae0;
-            padding: 8px 6px;
+            padding: 5px 4px;
             vertical-align: top;
-            font-size: 8.5px;
+            font-size: 8px;
+            page-break-inside: auto;
+            word-wrap: break-word;
+        }
+        .items-tbl tr {
+            page-break-inside: auto;
+            page-break-after: auto;
         }
         .items-tbl tr:nth-child(even) td {
             background: #f8f9fc;
@@ -175,6 +212,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
 
         .sno-col   { width: 28px; text-align: center; }
         .desc-col  { /* auto width - takes remaining */ }
+        .hsn-col   { width: 55px; text-align: center; }
         .unit-col  { width: 40px; text-align: center; }
         .qty-col   { width: 45px; text-align: center; }
         .rate-col  { width: 65px; text-align: right; }
@@ -189,8 +227,8 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             margin-bottom: 2px;
         }
         .item-sub-name {
-            font-size: 7.5px;
-            color: #6c757d;
+            font-size: 9px;
+            color: {{ $blue }};
             font-weight: bold;
             display: block;
             margin-bottom: 2px;
@@ -205,7 +243,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         /* ───────── TOTALS ───────── */
         .totals-outer {
             width: 100%;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
         .totals-tbl {
             width: 250px;
@@ -242,8 +280,8 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
 
         /* ───────── TERMS ───────── */
         .terms-section {
-            margin-top: 25px;
-            page-break-inside: avoid;
+            margin-top: 12px;
+            page-break-inside: auto;
         }
         .section-heading {
             font-size: 10px;
@@ -267,13 +305,17 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             margin-bottom: 4px;
         }
 
-        /* ───────── BANK ───────── */
+        /* ───────── BANK + SIGNATURE PAGE ───────── */
+        .closing-page {
+            page-break-before: always;
+        }
         .bank-box {
-            border: 1px solid #bfcae0;
+            border: 1px solid #b8daf7;
             padding: 10px 14px;
-            margin-top: 18px;
+            margin-top: 10px;
             width: 320px;
-            background: #fafbfd;
+            background: #eef5fc;
+            border-radius: 4px;
         }
         .bank-heading {
             font-weight: bold;
@@ -299,48 +341,6 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
         }
         .bank-value {
             color: {{ $grayText }};
-        }
-
-        /* ───────── SIGNATURE ───────── */
-        .sig-tbl {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 45px;
-        }
-        .sig-tbl td {
-            vertical-align: bottom;
-        }
-        .sig-left {
-            font-style: italic;
-            color: #888;
-            font-size: 8.5px;
-            width: 50%;
-        }
-        .sig-right {
-            text-align: right;
-            width: 50%;
-        }
-        .sig-for {
-            font-weight: bold;
-            color: {{ $darkText }};
-            font-size: 10px;
-            margin-bottom: 50px;
-        }
-        .sig-img {
-            max-height: 50px;
-            max-width: 120px;
-            margin-bottom: 5px;
-        }
-        .sig-line {
-            font-weight: bold;
-            color: {{ $blue }};
-            font-size: 9px;
-            text-decoration: underline;
-        }
-        .sig-note {
-            font-size: 7px;
-            color: #aaa;
-            margin-top: 3px;
         }
     </style>
 </head>
@@ -432,10 +432,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
     {{-- SUBJECT                                --}}
     {{-- ═══════════════════════════════════════ --}}
     <div class="subject-line">
-        Sub: Quotation for {{ optional($quotation->items->first()?->service)->name ?? 'requested services' }}
-        @if($quotation->customer_name)
-            for {{ $quotation->customer_name }} site.
-        @endif
+        Sub: {{ $quotation->subject ?: ('Quotation for ' . (optional($quotation->items->first()?->service)->name ?? 'requested services') . ($quotation->customer_name ? ' for ' . $quotation->customer_name . ' site.' : '')) }}
     </div>
 
     {{-- ═══════════════════════════════════════ --}}
@@ -446,6 +443,7 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
             <tr>
                 <th class="sno-col">S.No</th>
                 <th class="desc-col">Description of Goods &amp; Services</th>
+                <th class="hsn-col">HSN / SAC / CODE</th>
                 <th class="unit-col">Unit</th>
                 <th class="qty-col">Qty</th>
                 <th class="rate-col">Rate (&#x20B9;)</th>
@@ -459,15 +457,21 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
                 <td class="sno-col">{{ $index + 1 }}</td>
                 <td class="desc-col">
                     @php
-                        $itemName = $item->serviceItem?->item_name ?? $item->manual_item_name;
+                        $isManual = is_null($item->service_id);
+                        $svcName = $isManual ? $item->manual_service_name : null;
+                        $itemName = optional($item->serviceItem)->item_name ?? $item->manual_item_name;
                     @endphp
+                    @if($svcName)
+                        <div class="item-svc-name">{{ $svcName }}</div>
+                    @endif
                     @if($itemName)
-                        <div class="item-svc-name" style="font-size: 9.5px; margin-bottom: 4px;">{{ $itemName }}</div>
+                        <div class="item-sub-name">{{ $itemName }}</div>
                     @endif
                     @if($item->description)
                         <div class="item-desc-text" style="font-size: 8.5px; margin-top: 2px;">{!! nl2br(e($item->description)) !!}</div>
                     @endif
                 </td>
+                <td class="hsn-col">{{ optional($item->serviceItem)->hsn_sac_code ?: '-' }}</td>
                 <td class="unit-col">{{ $item->unit }}</td>
                 <td class="qty-col">{{ $item->quantity }}</td>
                 <td class="rate-col">{{ $fmt($item->selling_rate) }}</td>
@@ -491,12 +495,31 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
                 <td class="tot-label">GST</td>
                 <td class="tot-val">&#x20B9; {{ $fmt($quotation->gst_total) }}</td>
             </tr>
+            @php
+                $roundOff = $quotation->grand_total - ($quotation->subtotal + $quotation->gst_total);
+            @endphp
+            <tr>
+                <td class="tot-label">Round Off</td>
+                <td class="tot-val">&#x20B9; {{ $fmt($roundOff) }}</td>
+            </tr>
             <tr>
                 <td class="grand-label">Grand Total</td>
                 <td class="grand-val">&#x20B9; {{ $fmt($quotation->grand_total) }}</td>
             </tr>
         </table>
     </div>
+
+    @if($quotation->methodology_content || $quotation->methodology)
+    <div class="terms-section">
+        <div class="terms-body">
+            @if($quotation->methodology_content)
+                {!! $quotation->methodology_content !!}
+            @else
+                {!! $quotation->methodology->content !!}
+            @endif
+        </div>
+    </div>
+    @endif
 
     {{-- ═══════════════════════════════════════ --}}
     {{-- TERMS & CONDITIONS                     --}}
@@ -521,38 +544,33 @@ $companyName = optional($quotation->company)->name ?? 'MAYON FLOORING';
     </div>
 
     {{-- ═══════════════════════════════════════ --}}
-    {{-- BANK DETAILS                           --}}
+    {{-- BANK DETAILS + SIGNATURE (separate page) --}}
     {{-- ═══════════════════════════════════════ --}}
-    <div class="bank-box">
-        <div class="bank-heading">Bank Account Details</div>
-        <table class="bank-tbl">
-            <tr><td class="bank-key">Beneficiary:</td><td class="bank-value">MAYON INTERIORS INFRA SOLUTION</td></tr>
-            <tr><td class="bank-key">Bank:</td><td class="bank-value">State Bank of India</td></tr>
-            <tr><td class="bank-key">Account No:</td><td class="bank-value">40933397145</td></tr>
-            <tr><td class="bank-key">Branch:</td><td class="bank-value">Old Madras Road, KR Puram</td></tr>
-            <tr><td class="bank-key">IFSC Code:</td><td class="bank-value">SBIN0040744</td></tr>
-        </table>
-    </div>
+    <div class="closing-page">
+        <div class="bank-box">
+            <div class="bank-heading">Bank Account Details</div>
+            <table class="bank-tbl">
+                <tr><td class="bank-key">Beneficiary:</td><td class="bank-value">MAYON INTERIORS INFRA SOLUTION</td></tr>
+                <tr><td class="bank-key">Bank:</td><td class="bank-value">State Bank of India</td></tr>
+                <tr><td class="bank-key">Account No:</td><td class="bank-value">40933397145</td></tr>
+                <tr><td class="bank-key">Branch:</td><td class="bank-value">Old Madras Road, KR Puram</td></tr>
+                <tr><td class="bank-key">IFSC Code:</td><td class="bank-value">SBIN0040744</td></tr>
+            </table>
+        </div>
 
-    {{-- ═══════════════════════════════════════ --}}
-    {{-- SIGNATURE                              --}}
-    {{-- ═══════════════════════════════════════ --}}
-    <table class="sig-tbl">
-        <tr>
-            <td class="sig-left">
-                Thank you for your business!<br>
-                We look forward to working with you.
-            </td>
-            <td class="sig-right">
-                <div class="sig-for">For {{ $companyName }}</div>
-                @if($authSigSrc)
-                    <img src="{{ $authSigSrc }}" class="sig-img"><br>
-                @endif
-                <div class="sig-line">Authorized Signatory</div>
-                <div class="sig-note">(Computer generated document)</div>
-            </td>
-        </tr>
-    </table>
+        <div style="margin-top: 30px; font-size: 8.5px; line-height: 1.6; color: #333;">
+            Thanking you,<br>
+            With Regards,<br><br>
+            <strong style="color: {{ $blue }}; font-size: 10px;">For MAYON FLOORING</strong><br><br>
+            Authorized Signatory<br>
+            Sales Team<br>
+            PH: 8015468174 / 7022548598
+        </div>
+
+        <div style="text-align: center; margin-top: 25px; font-size: 8px; color: #888; font-style: italic; width: 100%; border-top: 1px dashed #ddd; padding-top: 8px;">
+            (Computer generated quotation, No signature required)
+        </div>
+    </div>
 
 </body>
 </html>
