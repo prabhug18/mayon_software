@@ -25,7 +25,6 @@ class EnquiryController extends Controller
             // Period Filter
             if ($request->period && $request->period != 'all') {
                 $now = \Carbon\Carbon::now();
-                $dateField = 'created_at'; // Default
                 
                 // We'll use a subquery or raw where to check against the combined date
                 if ($request->period == '7days') {
@@ -44,10 +43,30 @@ class EnquiryController extends Controller
                 $query->whereRaw('YEAR(COALESCE(fb_created_at, created_at)) = ?', [$request->year]);
             }
 
+            // Source Filter
+            if ($request->filled('source_id') && $request->source_id != 'all') {
+                $query->where('source_id', $request->source_id);
+            }
+
+            // Status Filter
+            if ($request->filled('status') && $request->status != 'all') {
+                $query->where('status', $request->status);
+            }
+
+            // Service Filter
+            if ($request->filled('service_id') && $request->service_id != 'all') {
+                $query->where('service_id', $request->service_id);
+            }
+
             $data = $query->orderByRaw('COALESCE(fb_created_at, created_at) DESC')->get();
             return $this->success($data);
         }
-        return view('master.enquiry.index', compact('heading'));
+
+        $sources = Source::orderBy('name')->get();
+        $services = \App\Models\Service::where('is_active', true)->orderBy('name')->get();
+        $statuses = ['Open', 'In Progress', 'Won', 'Lost'];
+
+        return view('master.enquiry.index', compact('heading', 'sources', 'services', 'statuses'));
     }
 
     public function create()

@@ -9,6 +9,9 @@ window.Enquiry = (function () {
                     d.year = $('#year_filter').val();
                     d.from = $('#from_date').val();
                     d.to = $('#to_date').val();
+                    d.source_id = $('#source_filter').val();
+                    d.status = $('#status_filter').val();
+                    d.service_id = $('#service_filter').val();
                 },
                 dataSrc: 'data' 
             },
@@ -46,8 +49,8 @@ window.Enquiry = (function () {
                 {
                     data: null,
                     render: function (row) {
-                        let source = (row.source && row.source.name) || '-';
-                        if (row.fb_lead_id) {
+                        let sourceName = (row.source && row.source.name) || 'Unknown';
+                        if (row.fb_lead_id || (row.source && row.source.name === 'Facebook')) {
                             let fbDate = '';
                             if (row.fb_created_at) {
                                 try {
@@ -57,7 +60,26 @@ window.Enquiry = (function () {
                             }
                             return `<span class="badge" style="background-color: #e7f1ff; color: #0d6efd; border: 1px solid #9ec5fe; padding: 0.4em 0.6em;"><i class="bi bi-facebook me-1"></i> Facebook</span>${fbDate}`;
                         }
-                        return source;
+
+                        // Stylized badge for custom sources
+                        let badgeStyle = 'background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;';
+                        let icon = '<i class="bi bi-tag me-1"></i>';
+                        const sLower = sourceName.toLowerCase();
+                        if (sLower.includes('telecalling') || sLower.includes('cold call') || sLower.includes('call')) {
+                            badgeStyle = 'background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;';
+                            icon = '<i class="bi bi-telephone-inbound me-1"></i> ';
+                        } else if (sLower.includes('excel') || sLower.includes('sheet') || sLower.includes('import')) {
+                            badgeStyle = 'background-color: #f0fdf4; color: #15803d; border: 1px solid #86efac;';
+                            icon = '<i class="bi bi-file-earmark-excel me-1"></i> ';
+                        } else if (sLower.includes('website') || sLower.includes('web')) {
+                            badgeStyle = 'background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;';
+                            icon = '<i class="bi bi-globe me-1"></i> ';
+                        } else if (sLower.includes('referral') || sLower.includes('friend')) {
+                            badgeStyle = 'background-color: #fdf4ff; color: #a21caf; border: 1px solid #f0abfc;';
+                            icon = '<i class="bi bi-people me-1"></i> ';
+                        }
+
+                        return `<span class="badge" style="${badgeStyle} padding: 0.4em 0.6em;">${icon}${sourceName}</span>`;
                     }
                 },
                 {
@@ -115,7 +137,7 @@ window.Enquiry = (function () {
             }
         });
 
-        $('#year_filter, #from_date, #to_date').on('change', function() {
+        $('#source_filter, #status_filter, #service_filter, #year_filter, #from_date, #to_date').on('change', function() {
             table.ajax.reload();
         });
     }

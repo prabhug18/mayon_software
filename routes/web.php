@@ -86,6 +86,13 @@ Route::middleware('auth')->group(function () {
 
     // Enquiry Management
     Route::middleware(['permission:view enquiries'])->group(function () {
+        // Excel & CSV Lead Import (Dedicated)
+        Route::get('enquiries/excel-import', [App\Http\Controllers\ExcelLeadImportController::class, 'showImportForm'])->name('enquiries.excel.import');
+        Route::get('enquiries/excel-import/sample-template', [App\Http\Controllers\ExcelLeadImportController::class, 'downloadSampleTemplate'])->name('enquiries.excel.sampleTemplate');
+        Route::post('enquiries/excel-import/preview', [App\Http\Controllers\ExcelLeadImportController::class, 'preview'])->name('enquiries.excel.preview');
+        Route::post('enquiries/excel-import/process', [App\Http\Controllers\ExcelLeadImportController::class, 'import'])->name('enquiries.excel.process');
+
+        // Facebook Leads Import (Existing)
         Route::get('enquiries/import', [App\Http\Controllers\FacebookLeadImportController::class, 'showImportForm'])->name('enquiries.import');
         Route::post('enquiries/import/preview', [App\Http\Controllers\FacebookLeadImportController::class, 'preview'])->name('enquiries.import.preview');
         Route::post('enquiries/import/process', [App\Http\Controllers\FacebookLeadImportController::class, 'import'])->name('enquiries.import.process');
